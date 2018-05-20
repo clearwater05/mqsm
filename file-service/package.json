@@ -1,0 +1,17 @@
+{
+  "name": "file-service",
+  "version": "0.0.0",
+  "description": "file service for MPD Queue Manager",
+  "main": "file.service.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "co": "^4.6.0",
+    "cote": "^0.16.2",
+    "ffmetadata": "^1.5.0"
+  },
+  "devDependencies": {}
+}
