@@ -1,15 +1,30 @@
-const cote = require('cote');
-const Publisher = cote.Publisher;
+const cote = require('cote')({environment: 'mqm'});
+const {
+    CURRENT_SONG,
+    CURRENT_MPD_STATUS
+} = require('../mpd-service.contants');
 
-class MpdEventsPublisher {
+const publisher = new cote.Publisher(
+    {
+        name: 'mqm-mpd-events-publisher'
+    }
+);
+
+
+module.exports = {
     /**
      *
+     * @param {String} currentSong
      */
-    constructor() {
-        this.publisher = new Publisher({
-            name: 'mqm-mpd-events-publisher'
-        });
-    }
-}
+    publishCurrentSong(currentSong) {
+        publisher.publish(CURRENT_SONG, currentSong);
+    },
 
-module.exports = new MpdEventsPublisher();
+    /**
+     *
+     * @param status
+     */
+    publishCurrentStatus(status) {
+        publisher.publish(CURRENT_MPD_STATUS, status);
+    }
+};

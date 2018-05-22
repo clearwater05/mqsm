@@ -36,7 +36,11 @@ const Song = sequelize.define('song', {
     performer: {type: Sequelize.STRING},
     duration: {type: Sequelize.FLOAT},
     originalyear: {type: Sequelize.STRING},
-    effective_originalyear: {type: Sequelize.STRING}
+    effective_originalyear: {type: Sequelize.STRING},
+    releasecountry: {type: Sequelize.STRING},
+    sourcemedia: {type: Sequelize.STRING},
+    publisher: {type: Sequelize.STRING},
+    other_tags: {type: Sequelize.JSON}
 }, {
     timestamps: false,
     indexes: [

@@ -2,5 +2,5 @@ node_modules
 .idea
 front-service/server/public/css
 front-service/server/public/js
-database-service/models/db/msqm.db
+database-service/data/mqm.db
 package-lock.json
