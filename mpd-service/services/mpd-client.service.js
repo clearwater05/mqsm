@@ -32,24 +32,6 @@ module.exports = {
 
     /**
      *
-     * @returns {Promise<any>}
-     */
-    requestCurrentStatus() {
-        return new Promise((resolve, reject) => {
-            mpdClient.sendCommand(cmd('status', []), (err, msg) => {
-                if (err) {
-                    reject(err);
-                }
-                const status = parseKeyValueMessage(msg);
-                mpdState = Object.assign(mpdState, status);
-
-                resolve(status);
-            });
-        });
-    },
-
-    /**
-     *
      * @param {String} currentSong
      * @returns {boolean}
      */
@@ -66,22 +48,78 @@ module.exports = {
 
     /**
      *
-     * @returns {Promise}
+     * @param command
+     * @returns {Promise<any>}
      */
-    getCurrentSong() {
+    mpdClientSendCommand(command) {
         return new Promise((resolve, reject) => {
-            try {
-                mpdClient.sendCommand(cmd('currentsong', []), (err, msg) => {
-                    if (err) {
-                        reject(err);
-                    }
-
-                    const song = parseKeyValueMessage(msg);
-                    resolve(song.file);
-                });
-            } catch (e) {
-                reject(e);
-            }
+            mpdClient.sendCommand((command), (err, msg) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(msg);
+            });
         });
+    },
+
+    /**
+     *
+     * @returns {Promise<{}|*>}
+     */
+    async requestCurrentStatus() {
+        const command = cmd('status', []);
+
+        try {
+            const rawStatus = await this.mpdClientSendCommand(command);
+            const status = parseKeyValueMessage(rawStatus);
+            mpdState = Object.assign(mpdState, status);
+
+            return status;
+        } catch (e) {
+            // console.log(e); //TODO error handling
+        }
+    },
+
+    /**
+     *
+     * @returns {Promise<string>}
+     */
+    async getCurrentSong() {
+        const command = cmd('currentsong', []);
+        try {
+            const rawSong = await this.mpdClientSendCommand(command);
+            const song = parseKeyValueMessage(rawSong);
+            return song.file;
+        } catch (e) {
+            // console.log(e); //TODO error handling
+        }
+    },
+
+    /**
+     *
+     * @param filter
+     * @returns {Promise<Array>}
+     */
+    async getSongList(filter) {
+        const cmdParams = ['file'];
+
+        if (filter) {
+            cmdParams.push(filter.name, filter.value);
+        }
+
+        cmdParams.push('group', 'album');
+        const command = cmd('list', cmdParams);
+
+        try {
+            const rawList = await this.mpdClientSendCommand(command);
+            let list = mpd.parseArrayMessage(rawList);
+
+            if (list.length === 1 && Object.keys(list[0]).length < 1) {
+                list = [];
+            }
+            return list;
+        } catch (e) {
+            // console.log(e); //TODO error handling
+        }
     }
 };

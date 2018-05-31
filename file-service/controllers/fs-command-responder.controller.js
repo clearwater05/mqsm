@@ -1,12 +1,11 @@
-const cote = require('cote')({environment: 'mqm'});
-
+const responder = require('../services/fis-command-responder.service');
 const fileMethods = require('../services/files-methods.service');
-const {REQUEST_COVER, REQUEST_FILE_METADATA} = require('../file-service.constants');
 
-const responder = new cote.Responder({
-    name: 'mqm-fs-command-responder',
-    namespace: 'file-service'
-});
+const {
+    REQUEST_COVER,
+    REQUEST_FILE_METADATA,
+    REQUEST_FILES_LIST_METADATA
+} = require('../file-service.constants');
 
 module.exports = () => {
     /**
@@ -27,5 +26,15 @@ module.exports = () => {
         const metadata = await fileMethods.getMetadata(file);
 
         cb(metadata);
+    });
+
+    /**
+     *
+     */
+    responder.on(REQUEST_FILES_LIST_METADATA, async (req, cb) => {
+        const completeList = req.value.slice(0, 100); //TODO remove limit 100
+        const result = await fileMethods.proceedFilesQueue(completeList);
+
+        cb(result);
     });
 };

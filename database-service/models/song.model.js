@@ -1,5 +1,9 @@
+const util = require('util');
 const Sequelize = require('sequelize');
 
+const promisedTimeout = util.promisify(setTimeout);
+
+const {mapMetaTagsToProps} = require('../libs/utils');
 const sequelize = require('../services/sequelize.service');
 
 const Song = sequelize.define('song', {
@@ -13,21 +17,23 @@ const Song = sequelize.define('song', {
     track: {type: Sequelize.INTEGER},
     tracktotal: {type: Sequelize.INTEGER},
     disc: {type: Sequelize.INTEGER},
-    year: {type: Sequelize.STRING},
+    date: {type: Sequelize.STRING},
     genre: {type: Sequelize.STRING},
     comment: {type: Sequelize.STRING},
     compilation: {type: Sequelize.BOOLEAN},
     length: {type: Sequelize.FLOAT},
     bitrate: {type: Sequelize.INTEGER},
-    samplerate: {type: Sequelize.INTEGER},
-    directory: {type: Sequelize.STRING},
+    sample_rate: {type: Sequelize.INTEGER},
     mtime: {type: Sequelize.INTEGER},
     ctime: {type: Sequelize.INTEGER},
     filesize: {type: Sequelize.INTEGER},
     cover: {type: Sequelize.STRING},
     filetype: {type: Sequelize.STRING},
-    playcount: {type: Sequelize.INTEGER},
+    channels: {type: Sequelize.INTEGER},
+    channel_layout: {type: Sequelize.STRING},
+    fmps_playcount: {type: Sequelize.INTEGER},
     lastplayed: {type: Sequelize.DATE},
+    fmps_rating: {type: Sequelize.FLOAT},
     rating: {type: Sequelize.INTEGER},
     skipcount: {type: Sequelize.INTEGER},
     autoscore: {type: Sequelize.FLOAT},
@@ -53,6 +59,21 @@ const Song = sequelize.define('song', {
         }
     ]
 });
+
+/**
+ *
+ * @param songInfo
+ * @returns {Promise.<void>}
+ */
+Song.songUpsert = async (songInfo) => {
+    try {
+        const props = mapMetaTagsToProps(songInfo);
+        await Song.upsert(props);
+    } catch (e) {
+        console.log(e);
+        //TODO error handler
+    }
+};
 
 Song.sync();
 

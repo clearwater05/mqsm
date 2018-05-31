@@ -1,7 +1,11 @@
 const cote = require('cote')({environment: 'mqm'});
 const path = require('path');
 
-const {REQUEST_COVER, REQUEST_FILE_METADATA} = require('../../front.constants');
+const {
+    REQUEST_COVER,
+    REQUEST_FILE_METADATA,
+    REQUEST_FILES_LIST_METADATA
+} = require('../../front.constants');
 
 const fsRequester = new cote.Requester({
     namespace: 'file-service',
@@ -11,7 +15,8 @@ const fsRequester = new cote.Requester({
 module.exports = {
     /**
      *
-     * @param {String} song
+     * @param {string} song
+     * @returns {Promise<any>}
      */
     getCoverForAlbum(song) {
         return new Promise((resolve, reject) => {
@@ -32,7 +37,8 @@ module.exports = {
 
     /**
      *
-     * @param {String} fileName
+     * @param {string} fileName
+     * @returns {Promise<any>}
      */
     getFileMetaData(fileName) {
         return new Promise((resolve, reject) => {
@@ -47,6 +53,28 @@ module.exports = {
                 });
             } else {
                 reject({});
+            }
+        });
+    },
+
+    /**
+     *
+     * @param {Array} list
+     * @returns {Promise<Array>}
+     */
+    getFilesListMetaData(list) {
+        return new Promise((resolve, reject) => {
+            if (Array.isArray(list) && list.length > 0) {
+                const req = {
+                    type: REQUEST_FILES_LIST_METADATA,
+                    value: list
+                };
+
+                fsRequester.send(req, (res) => {
+                    resolve(res);
+                });
+            } else {
+                reject();
             }
         });
     }

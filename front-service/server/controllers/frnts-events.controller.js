@@ -1,18 +1,20 @@
-const cote = require('cote')({environment: 'mqm'});
+const frntFileCommandService = require('../services/frnt-file-commands.service');
+const subscriber = require('../services/frnt-events-subscriber.service');
 
-const {CURRENT_MPD_STATUS, CURRENT_SONG} = require('../../front.constants');
-const frntFileCommandService = require('../services/frnt-file-command.service');
+const {
+    CURRENT_MPD_STATUS,
+    CURRENT_SONG,
+    UPDATE_DATABASE_PROGRESS
+} = require('../../front.constants');
 
-const subscriber = new cote.Subscriber({
-    name: 'mqm-frnt-events-subscriber'
-});
 
-module.exports = () => {
+
+module.exports = (io) => {
     /**
      *
      */
     subscriber.on(CURRENT_MPD_STATUS, (status) => {
-        // console.log(status);
+        io.emit('action', {type: CURRENT_MPD_STATUS, data: status});
     });
 
     /**
@@ -27,5 +29,12 @@ module.exports = () => {
         } catch (e) {
             console.log(e);
         }
+    });
+
+    /**
+     *
+     */
+    subscriber.on(UPDATE_DATABASE_PROGRESS, (progress) => {
+        io.emit('action', {type: UPDATE_DATABASE_PROGRESS, data: progress});
     });
 };

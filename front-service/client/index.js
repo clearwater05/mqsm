@@ -7,11 +7,11 @@ import io from 'socket.io-client';
 
 import reducer from './reducers/index';
 import App from './components/app';
-import './all.less';
+import './all.scss';
 
 const address = `${window.location.hostname}:${window.location.port}`;
 const socket = io(address);
-const socketIoMiddleware = createSocketIoMiddleware(socket, 'public:action:');
+const socketIoMiddleware = createSocketIoMiddleware(socket, ['COMMAND:', 'EVENT:']);
 const store = applyMiddleware(socketIoMiddleware)(createStore)(reducer);
 
 ReactDOM.render(
