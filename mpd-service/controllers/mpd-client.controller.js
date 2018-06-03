@@ -1,18 +1,30 @@
-const mpdApi = require('../services/mpd-client.service');
+const mpdClientService = require('../services/mpd-client.service');
 const eventsPublisher = require('../services/mpd-events-publisher.service');
+const { MPD_STATUS_PUBLISH_DELAY } = require('../mpd-service.config');
 
-const mpdClient = mpdApi.getMpdClient();
+const mpdClient = mpdClientService.getMpdClient();
 /**
  *
  */
 module.exports = () => {
+    let systemPlayerEvent = false;
+
+    /**
+     *
+     * @param {boolean} state
+     */
+    function setPlayerEventState(state) {
+        systemPlayerEvent = state;
+    }
+
+
     /**
      *
      */
     mpdClient.on('ready', async () => {
-        const song = await mpdApi.getCurrentSong();
-        const status = await mpdApi.requestCurrentStatus();
-        mpdApi.manageCurrentSongState(song);
+        const song = await mpdClientService.getCurrentSong();
+        const status = await mpdClientService.requestCurrentStatus();
+        mpdClientService.manageCurrentSong(song);
 
         eventsPublisher.publishCurrentSong(song);
         eventsPublisher.publishCurrentStatus(status);
@@ -23,16 +35,22 @@ module.exports = () => {
      *
      */
     mpdClient.on('system-player', async () => {
-        const song = await mpdApi.getCurrentSong();
-        const status = await mpdApi.requestCurrentStatus();
+        setPlayerEventState(true);
+        const song = await mpdClientService.getCurrentSong();
+        const status = await mpdClientService.requestCurrentStatus();
 
-        const currentSongStateChanged = mpdApi.manageCurrentSongState(song);
+        const currentSongStateChanged = mpdClientService.manageCurrentSong(song);
 
-        if (currentSongStateChanged) {
-            eventsPublisher.publishCurrentSong(song);
+        if (currentSongStateChanged && status.state === 'play') {
+            const previousSong = mpdClientService.getPreviousSong();
+            if (previousSong) {
+                await eventsPublisher.updateSongStatistics(previousSong);
+            }
+            await eventsPublisher.publishCurrentSong(song);
         }
 
-        eventsPublisher.publishCurrentStatus(status);
+        await eventsPublisher.publishCurrentStatus(status);
+        setPlayerEventState(false);
     });
 
 
@@ -46,7 +64,9 @@ module.exports = () => {
     /**
      *
      */
-    mpdClient.on('system-playlist', () => {
+    mpdClient.on('system-playlist', async () => {
+        const list = await mpdClientService.getCurrentPlaylist();
+        console.log(list);
         console.log('system-playlist');
     });
 
@@ -54,9 +74,9 @@ module.exports = () => {
      *
      */
     setInterval(async () => {
-        if (mpdApi.getState().state === 'play') {
-            const status = await mpdApi.requestCurrentStatus();
-            eventsPublisher.publishCurrentStatus(status);
+        if (mpdClientService.getState().state === 'play' && !systemPlayerEvent) {
+            const status = await mpdClientService.requestCurrentStatus();
+            await eventsPublisher.publishCurrentStatus(status);
         }
-    }, 1000);
+    }, MPD_STATUS_PUBLISH_DELAY);
 };

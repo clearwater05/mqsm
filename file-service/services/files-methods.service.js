@@ -7,7 +7,7 @@ const ffprobeStatic = require('ffprobe-static');
 
 const promisedTimeout = util.promisify(setTimeout);
 
-const {keysToLowerCase} = require('../libs/utils');
+const {prepareMetaDataTags} = require('../libs/utils');
 const {
     BASE_PATH,
     READ_CHUNK_SIZE,
@@ -105,7 +105,7 @@ module.exports = {
                     return;
                 }
                 data.filename = rawFileName;
-                resolve(keysToLowerCase(data));
+                resolve(prepareMetaDataTags(data));
             });
         });
     },
@@ -125,7 +125,7 @@ module.exports = {
                 }
 
                 delete data.streams[0].disposition;
-                resolve(keysToLowerCase(data.streams[0]));
+                resolve(prepareMetaDataTags(data.streams[0]));
             });
         });
     },

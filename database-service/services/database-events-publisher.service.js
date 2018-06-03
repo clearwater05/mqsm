@@ -33,10 +33,10 @@ module.exports = {
                 progress.state = state;
                 progress.done = done;
                 break;
-            case 'start:':
+            case 'start':
                 progress.state = state;
                 progress.total = total;
-                progress.done = done;
+                progress.done = 0;
                 break;
             default:
                 progress.state = state;

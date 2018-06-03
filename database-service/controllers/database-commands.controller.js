@@ -7,7 +7,8 @@ const songModel = require('../models/song.model');
 const promisedTimeout = util.promisify(setTimeout);
 
 const {
-    UPDATE_DATABASE
+    UPDATE_DATABASE,
+    INCREASE_SONG_PLAYCOUNT_COMMAND
 } = require('../database-service.constants');
 
 module.exports = () => {
@@ -33,5 +34,15 @@ module.exports = () => {
             //TODO error handler
         }
         cb(true);
+    });
+
+    /**
+     *
+     */
+    dbCommandResponder.on(INCREASE_SONG_PLAYCOUNT_COMMAND, async (req, cb) => {
+        const song = req.value;
+        const result = await songModel.updateSongStatistic(song);
+
+        cb('got it');
     });
 };

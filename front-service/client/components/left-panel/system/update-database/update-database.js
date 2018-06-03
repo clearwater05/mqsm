@@ -11,17 +11,27 @@ class UpdateDatabaseComponent extends PureComponent {
     onClick() {
         this.props.updateDatabase();
     }
+
     /**
      *
-     * @returns {XML}
+     * @return {*[]}
      */
     render() {
         return (
-            <Button onClick={this.onClick.bind(this)}>
-                <span aria-hidden="true">Update database</span>
-            </Button>
+            [
+                <div key="done">{this.props.progress.done || 0}</div>,
+                <Button key="button" onClick={this.onClick.bind(this)}>
+                    <span aria-hidden="true">Update database</span>
+                </Button>
+            ]
         );
     }
 }
 
-export default connect(null, {updateDatabase})(UpdateDatabaseComponent);
+function mapStateToProps(state) {
+    return {
+        progress: state.updateDatabaseReducer.dbUpdateProgress
+    };
+}
+
+export default connect(mapStateToProps, {updateDatabase})(UpdateDatabaseComponent);

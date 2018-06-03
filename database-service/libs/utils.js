@@ -1,3 +1,51 @@
+/**
+ * @typedef {Object} SongModel
+ * @property filename
+ * @property title
+ * @property album
+ * @property album_path
+ * @property artist
+ * @property albumartist
+ * @property composer
+ * @property track
+ * @property tracktotal
+ * @property disc
+ * @property date
+ * @property genre
+ * @property comment
+ * @property originalyear
+ * @property effectiveoriginalyear
+ * @property releasecountry
+ * @property sourcemedia
+ * @property publisher
+ * @property effective_albumartist
+ * @property etag
+ * @property performer
+ * @property compilation
+ * @property duration
+ * @property length
+ * @property cover
+ * @property fmps_playcount
+ * @property lastplayed
+ * @property fmps_rating
+ * @property rating
+ * @property skipcount
+ * @property autoscore
+ * @property channels
+ * @property channel_layout
+ * @property filetype
+ * @property bitrate
+ * @property sample_rate
+ * @property mtime
+ * @property ctime
+ * @property filesize
+ * 
+ */
+
+/**
+ *
+ * @type {string[]}
+ */
 const songTags = [
     'filename',
     'title',
@@ -13,7 +61,7 @@ const songTags = [
     'genre',
     'comment',
     'originalyear',
-    'effective_originalyear',
+    'effectiveoriginalyear',
     'releasecountry',
     'sourcemedia',
     'publisher',
@@ -47,6 +95,10 @@ module.exports = {
      * @return {Song}
      */
     mapMetaTagsToProps(rawData) {
+        /**
+         *
+         * @type {SongModel}
+         */
         const data = {};
 
         songTags.forEach((tag) => {
