@@ -7,7 +7,8 @@ import moment from 'moment';
 import {
     updateDatabase,
     updateDatabaseSince,
-    updateDatabaseFromDirName
+    updateDatabaseFromDirName,
+    databaseCleanUp
 } from '../../../../actions/system.actions';
 
 class UpdateDatabaseComponent extends PureComponent {
@@ -19,6 +20,7 @@ class UpdateDatabaseComponent extends PureComponent {
         };
         this.onUpdateDatabaseFromDirName = this.onUpdateDatabaseFromDirName.bind(this);
         this.onChangeDirName = this.onChangeDirName.bind(this);
+        this.cleanUpDatabase = this.cleanUpDatabase.bind(this);
     }
     /**
      *
@@ -53,7 +55,7 @@ class UpdateDatabaseComponent extends PureComponent {
 
     /**
      *
-     * @param {MomentDateObj} date
+     * @param {moment} date
      */
     handleSelectDate(date){
         this.setState({
@@ -64,7 +66,14 @@ class UpdateDatabaseComponent extends PureComponent {
 
     /**
      *
-     * @return {*[]}
+     */
+    cleanUpDatabase() {
+        this.props.databaseCleanUp();
+    }
+
+    /**
+     *
+     * @return {*}
      */
     render() {
         return (
@@ -92,6 +101,8 @@ class UpdateDatabaseComponent extends PureComponent {
                         </Button>
                     </InputGroupAddon>
                 </InputGroup>
+                <hr/>
+                <Button onClick={this.cleanUpDatabase}>Cleanup Database</Button>
             </Fragment>
         );
     }
@@ -106,5 +117,6 @@ function mapStateToProps(state) {
 export default connect(mapStateToProps, {
     updateDatabase,
     updateDatabaseSince,
-    updateDatabaseFromDirName
+    updateDatabaseFromDirName,
+    databaseCleanUp
 })(UpdateDatabaseComponent);

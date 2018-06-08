@@ -14,5 +14,18 @@ module.exports = {
             const metaSongList = await frntFileCommandService.getFilesListMetaData(rawSongList);
             await frntDBCommandService.updateDatabase(metaSongList);
         }
+    },
+
+    /**
+     *
+     * @return {Promise<void>}
+     */
+    async databaseCleanup() {
+        const fullSongList = await frntMpdCommandService.getSongsList();
+        if (fullSongList) {
+            const list = fullSongList.map(item => item.file);
+            const result = await frntDBCommandService.databaseCleanup(list);
+            console.log(`cleaned songs - ${result}`);
+        }
     }
 };

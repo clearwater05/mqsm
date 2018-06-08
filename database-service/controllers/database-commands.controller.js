@@ -10,7 +10,8 @@ const {
     UPDATE_DATABASE,
     INCREASE_SONG_PLAYCOUNT_COMMAND,
     CURRENT_PLAYLIST_COMMAND,
-    REQUEST_SONG_INFO
+    REQUEST_SONG_INFO,
+    CLEANUP_DATABASE_COMMAND
 } = require('../database-service.constants');
 
 module.exports = () => {
@@ -59,11 +60,22 @@ module.exports = () => {
         const song = req.value;
         const result = await songModel.updateSongStatistic(song);
 
-        cb('got it');
+        cb(true);
     });
 
+    /**
+     *
+     */
     dbCommandResponder.on(CURRENT_PLAYLIST_COMMAND, async (req, cb) => {
         const list = await songModel.getPlaylist(req.value);
         cb(list);
+    });
+
+    /**
+     *
+     */
+    dbCommandResponder.on(CLEANUP_DATABASE_COMMAND, async (req, cb) => {
+        const result = await songModel.cleanUpSongTable(req.value);
+        cb(result);
     });
 };

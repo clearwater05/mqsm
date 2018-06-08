@@ -140,6 +140,28 @@ Song.getPlaylist = async (rawList) => {
     }
 };
 
+/**
+ *
+ * @param {string[]} fullSongList
+ * @return {Promise<number>}
+ */
+Song.cleanUpSongTable = async (fullSongList) => {
+    try {
+        const cleaned = await Song.destroy({
+            where: {
+                filename: {
+                    [Op.notIn]: fullSongList
+                }
+            }
+        });
+
+        return (cleaned);
+    } catch (e) {
+        console.log(e);
+        return 0;
+    }
+};
+
 Song.sync();
 
 module.exports = Song;

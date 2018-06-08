@@ -8,8 +8,12 @@ const mpdRequester = new cote.Requester({
 
 module.exports = {
     /**
+     * @typedef {Object} mpdFilter
+     * @property name
+     * @property value
      *
-     * @param filter
+     * @param {mpdFilter} filter
+     * @return {Promise<string[]>}
      */
     getSongsList(filter = null) {
         return new Promise((resolve) => {

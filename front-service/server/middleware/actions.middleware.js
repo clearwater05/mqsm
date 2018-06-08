@@ -4,7 +4,8 @@ const frntPublisher = require('../services/frnt-service-publisher.service');
 const {
     UPDATE_DATABASE,
     UPDATE_DATABASE_SINCE,
-    UPDATE_DATABASE_DIR_NAME
+    UPDATE_DATABASE_DIR_NAME,
+    CLEANUP_DATABASE
 } = require('../../front.constants');
 
 
@@ -36,6 +37,9 @@ module.exports = (socket, next) => {
                 frntCommandsController.updateDatabaseSongsList(filterValue);
                 break;
             }
+            case CLEANUP_DATABASE:
+                frntCommandsController.databaseCleanup();
+                break;
             default: {
                 frntPublisher.publishEvents(data.type);
                 break;

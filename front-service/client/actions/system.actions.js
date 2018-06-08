@@ -1,7 +1,8 @@
 import {
     UPDATE_DATABASE,
     UPDATE_DATABASE_SINCE,
-    UPDATE_DATABASE_DIR_NAME
+    UPDATE_DATABASE_DIR_NAME,
+    CLEANUP_DATABASE
 } from '../../front.constants';
 
 /**
@@ -35,5 +36,15 @@ export function updateDatabaseFromDirName(dirName) {
     return {
         type: UPDATE_DATABASE_DIR_NAME,
         value: dirName
+    };
+}
+
+/**
+ *
+ * @return {{type: string, value: string}}
+ */
+export function databaseCleanUp() {
+    return {
+        type: CLEANUP_DATABASE
     };
 }
