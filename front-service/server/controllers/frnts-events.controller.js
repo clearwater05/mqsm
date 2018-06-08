@@ -2,18 +2,36 @@ const frntFileCommandService = require('../services/frnt-file-commands.service')
 const frntDatabaseCommandsService = require('../services/frnt-database-commands.service');
 const subscriber = require('../services/frnt-events-subscriber.service');
 
+/**
+ *
+ * @param {Object[]} arr
+ * @return {Object}
+ */
+function songsArrayToSongsObject(arr) {
+    return arr.reduce((obj, song) => {
+        obj[song.filename] = {...song};
+        return obj;
+    }, {});
+}
+
 const {
     CURRENT_MPD_STATUS,
     CURRENT_SONG,
     UPDATE_DATABASE_PROGRESS,
     INCREASE_SONG_PLAYCOUNT,
     UPDATE_DATABASE_PROGRESS_CLIENT,
-    CURRENT_MPD_STATUS_CLIENT
+    CURRENT_MPD_STATUS_CLIENT,
+    CURRENT_PLAYLIST,
+    CURRENT_PLAYLIST_CLIENT,
+    CURRENT_SONG_INFO_CLIENT
 } = require('../../front.constants');
 
 
 
 module.exports = (io) => {
+    let cachedRawPlaylist = [];
+    let cachedFullPlaylist = {};
+
     /**
      *
      */
@@ -26,10 +44,11 @@ module.exports = (io) => {
      */
     subscriber.on(CURRENT_SONG, async (song) => {
         try {
-            // const cover = await frntFileCommandService.getCoverForAlbum(song);
-            // const metaData = await frntFileCommandService.getFileMetaData(song); //TODO temporary change to database request
+            const songInfo = await frntDatabaseCommandsService.getSong(song);
+            const cover = await frntFileCommandService.getCoverForAlbum(song);
 
-            // console.log(metaData);
+            songInfo.cover = cover;
+            await io.emit('action', {type: CURRENT_SONG_INFO_CLIENT, data: {...songInfo}});
         } catch (e) {
             console.log(e);
         }
@@ -48,5 +67,30 @@ module.exports = (io) => {
      */
     subscriber.on(UPDATE_DATABASE_PROGRESS, async (progress) => {
         await io.emit('action', {type: UPDATE_DATABASE_PROGRESS_CLIENT, data: progress});
+    });
+
+    /**
+     *
+     */
+    subscriber.on(CURRENT_PLAYLIST, async (playlist) => {
+        const b = new Set(cachedRawPlaylist);
+        const difference = playlist.filter(x => !b.has(x));
+
+        const list = await frntDatabaseCommandsService.getPlaylist(difference);
+
+        for (let i = 0, j = list.length; i < j; i++) {
+            list[i].cover = await frntFileCommandService.getCoverForAlbum(list[i].filename);
+        }
+
+        const cachedList = songsArrayToSongsObject(list);
+
+        const result = playlist.map((item) => {
+            const obj = cachedList[item] || cachedFullPlaylist[item];
+            return {...obj};
+        });
+
+        cachedRawPlaylist = playlist.slice(0);
+        cachedFullPlaylist = songsArrayToSongsObject(result);
+        await io.emit('action', {type: CURRENT_PLAYLIST_CLIENT, data: result});
     });
 };

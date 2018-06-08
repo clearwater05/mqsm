@@ -105,7 +105,7 @@ module.exports = {
         try {
             const rawStatus = await this.mpdClientSendCommand(command);
             const status = parseKeyValueMessage(rawStatus);
-            mpdState = Object.assign(mpdState, status);
+            mpdState = {...mpdState, ...status};
 
             return status;
         } catch (e) {

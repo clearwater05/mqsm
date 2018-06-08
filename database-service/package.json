@@ -13,5 +13,8 @@
     "cote": "^0.16.2",
     "sequelize": "^4.37.8",
     "sqlite3": "^4.0.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.3"
   }
 }

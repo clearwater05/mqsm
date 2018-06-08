@@ -3,6 +3,8 @@ const Sequelize = require('sequelize');
 const {mapMetaTagsToProps} = require('../libs/utils');
 const sequelize = require('../services/sequelize.service');
 
+const Op = Sequelize.Op;
+
 const Song = sequelize.define('song', {
     filename: {type: Sequelize.STRING, allowNull: false, primaryKey: true},
     track: {type: Sequelize.INTEGER},
@@ -59,6 +61,23 @@ const Song = sequelize.define('song', {
 
 /**
  *
+ * @param song
+ * @return {Promise<Model>}
+ */
+Song.getSongInfo = async (song) => {
+    try {
+        return await Song.findOne({
+            where: {
+                filename: song
+            }
+        });
+    } catch (e) {
+        console.log(e);
+    }
+};
+
+/**
+ *
  * @param songInfo
  * @returns {Promise.<>}
  */
@@ -97,6 +116,25 @@ Song.updateSongStatistic = async (song) => {
         savedStatistics.set('lastplayed', new Date());
         savedStatistics.increment('fmps_playcount');
         savedStatistics.save();
+    } catch (e) {
+        console.log(e);
+    }
+};
+
+/**
+ *
+ * @param {string[]} rawList
+ * @return {Promise<Array<Model>>}
+ */
+Song.getPlaylist = async (rawList) => {
+    try {
+        return await Song.findAll({
+            where: {
+                filename: {
+                    [Op.in]: rawList
+                }
+            }
+        });
     } catch (e) {
         console.log(e);
     }

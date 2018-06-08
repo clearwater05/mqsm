@@ -66,8 +66,7 @@ module.exports = () => {
      */
     mpdClient.on('system-playlist', async () => {
         const list = await mpdClientService.getCurrentPlaylist();
-        console.log(list);
-        console.log('system-playlist');
+        await eventsPublisher.publishCurrentPlaylist(list);
     });
 
     /**

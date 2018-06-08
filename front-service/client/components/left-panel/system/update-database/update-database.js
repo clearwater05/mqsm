@@ -1,10 +1,25 @@
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import {connect} from 'react-redux';
-import { Button } from 'reactstrap';
+import { Button, InputGroup, InputGroupAddon, Input } from 'reactstrap';
+import { Calendar } from 'react-date-range';
+import moment from 'moment';
 
-import {updateDatabase} from '../../../../actions/system.actions';
+import {
+    updateDatabase,
+    updateDatabaseSince,
+    updateDatabaseFromDirName
+} from '../../../../actions/system.actions';
 
 class UpdateDatabaseComponent extends PureComponent {
+    constructor() {
+        super();
+        this.state = {
+            modifiedSinceSeconds: moment(),
+            updateDirName: ''
+        };
+        this.onUpdateDatabaseFromDirName = this.onUpdateDatabaseFromDirName.bind(this);
+        this.onChangeDirName = this.onChangeDirName.bind(this);
+    }
     /**
      *
      */
@@ -14,16 +29,70 @@ class UpdateDatabaseComponent extends PureComponent {
 
     /**
      *
+     */
+    onUpdateSince() {
+        this.props.updateDatabaseSince(this.state.modifiedSinceSeconds);
+    }
+
+    /**
+     *
+     */
+    onUpdateDatabaseFromDirName() {
+        this.props.updateDatabaseFromDirName(this.state.updateDirName);
+    }
+
+    /**
+     *
+     * @param event
+     */
+    onChangeDirName(event) {
+        this.setState({
+            updateDirName: event.target.value
+        });
+    }
+
+    /**
+     *
+     * @param {MomentDateObj} date
+     */
+    handleSelectDate(date){
+        this.setState({
+            modifiedSince: date,
+            modifiedSinceSeconds: date.valueOf() / 1000
+        });
+    }
+
+    /**
+     *
      * @return {*[]}
      */
     render() {
         return (
-            [
+            <Fragment>
                 <div key="done">{this.props.progress.done || 0}</div>,
                 <Button key="button" onClick={this.onClick.bind(this)}>
-                    <span aria-hidden="true">Update database</span>
+                    <span aria-hidden="true">Complete Database Update</span>
                 </Button>
-            ]
+                <hr />
+                <Calendar
+                    onInit={this.handleSelectDate.bind(this)}
+                    onChange={this.handleSelectDate.bind(this)}/>
+                <Button onClick={this.onUpdateSince.bind(this)}>
+                    <span>Update database since...</span>
+                </Button>
+                <hr />
+                <InputGroup>
+                    <InputGroupAddon addonType="prepend">BASE DIR/</InputGroupAddon>
+                    <Input placeholder="directory path"
+                           value={this.state.updateDirName}
+                           onChange={this.onChangeDirName} />
+                    <InputGroupAddon addonType="append">
+                        <Button onClick={this.onUpdateDatabaseFromDirName}>
+                            <span>Update database from dir...</span>
+                        </Button>
+                    </InputGroupAddon>
+                </InputGroup>
+            </Fragment>
         );
     }
 }
@@ -34,4 +103,8 @@ function mapStateToProps(state) {
     };
 }
 
-export default connect(mapStateToProps, {updateDatabase})(UpdateDatabaseComponent);
+export default connect(mapStateToProps, {
+    updateDatabase,
+    updateDatabaseSince,
+    updateDatabaseFromDirName
+})(UpdateDatabaseComponent);

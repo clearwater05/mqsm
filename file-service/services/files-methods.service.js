@@ -212,10 +212,11 @@ module.exports = {
             try {
                 stat = await this.getSongSavedStatistics(file);
             } catch (e) {
-                stat = {lastPlayed: '1970-01-01T00:00:00.000Z', fmps_playcount: 0, fmps_rating: 0};
+                stat = { lastPlayed: '1970-01-01T00:00:00.000Z' };
             }
 
-            return Object.assign({}, meta, prob, details, stat);
+            return { ...meta, ...prob, ...details, ...stat };
+            // return Object.assign({}, meta, prob, details, stat);
         }));
     },
 

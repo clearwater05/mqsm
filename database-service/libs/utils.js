@@ -134,7 +134,7 @@ module.exports = {
             }
         });
 
-        data.other_tags = Object.assign({}, rawData);
+        data.other_tags = {...rawData};
         return data;
     }
 };

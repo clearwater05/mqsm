@@ -32,7 +32,7 @@ module.exports = () => {
      *
      */
     responder.on(REQUEST_FILES_LIST_METADATA, async (req, cb) => {
-        const completeList = req.value.slice(0, 100); //TODO remove limit 100
+        const completeList = req.value.slice(0);
         const result = await fileMethods.proceedFilesQueue(completeList);
 
         cb(result);

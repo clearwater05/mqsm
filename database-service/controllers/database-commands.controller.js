@@ -8,10 +8,26 @@ const promisedTimeout = util.promisify(setTimeout);
 
 const {
     UPDATE_DATABASE,
-    INCREASE_SONG_PLAYCOUNT_COMMAND
+    INCREASE_SONG_PLAYCOUNT_COMMAND,
+    CURRENT_PLAYLIST_COMMAND,
+    REQUEST_SONG_INFO
 } = require('../database-service.constants');
 
 module.exports = () => {
+    /**
+     *
+     */
+    dbCommandResponder.on(REQUEST_SONG_INFO, async (req, cb) => {
+        try {
+            const song = req.value;
+            const songInfo = await songModel.getSongInfo(song)
+            cb(songInfo.toJSON());
+        } catch (e) {
+            console.log(e);
+            cb({});
+        }
+    });
+
     /**
      *
      */
@@ -44,5 +60,10 @@ module.exports = () => {
         const result = await songModel.updateSongStatistic(song);
 
         cb('got it');
+    });
+
+    dbCommandResponder.on(CURRENT_PLAYLIST_COMMAND, async (req, cb) => {
+        const list = await songModel.getPlaylist(req.value);
+        cb(list);
     });
 };

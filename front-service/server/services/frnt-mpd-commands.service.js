@@ -9,13 +9,13 @@ const mpdRequester = new cote.Requester({
 module.exports = {
     /**
      *
-     * @param since
+     * @param filter
      */
-    getSongsList(since = null) {
+    getSongsList(filter = null) {
         return new Promise((resolve) => {
             const req = {
                 type: REQUEST_SONGS_LIST,
-                value: since
+                value: filter
             };
 
             mpdRequester.send(req, (res) => {

@@ -5,12 +5,14 @@ const frntDBCommandService = require('../services/frnt-database-commands.service
 module.exports = {
     /**
      *
-     * @param since
+     * @param filter
      * @returns {Promise<void>}
      */
-    async updateDatabaseSongsList(since = null) {
-        const rawSongList = await frntMpdCommandService.getSongsList(since);
-        const metaSongList = await frntFileCommandService.getFilesListMetaData(rawSongList);
-        await frntDBCommandService.updateDatabase(metaSongList);
+    async updateDatabaseSongsList(filter = null) {
+        const rawSongList = await frntMpdCommandService.getSongsList(filter);
+        if (rawSongList) {
+            const metaSongList = await frntFileCommandService.getFilesListMetaData(rawSongList);
+            await frntDBCommandService.updateDatabase(metaSongList);
+        }
     }
 };
