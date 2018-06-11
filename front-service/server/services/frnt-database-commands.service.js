@@ -4,7 +4,8 @@ const {
     INCREASE_SONG_PLAYCOUNT_COMMAND,
     CURRENT_PLAYLIST_COMMAND,
     REQUEST_SONG_INFO,
-    CLEANUP_DATABASE_COMMAND
+    CLEANUP_DATABASE_COMMAND,
+    UPDATE_SONG_RATING_COMMAND
 } = require('../../front.constants');
 
 const dbRequester = new cote.Requester({
@@ -96,6 +97,28 @@ module.exports = {
             const req = {
                 type: CLEANUP_DATABASE_COMMAND,
                 value: fullList
+            };
+
+            dbRequester.send(req, (result) => {
+                resolve(result);
+            });
+        });
+    },
+
+    /**
+     *
+     * @param song
+     * @param rating
+     * @return {Promise<any>}
+     */
+    updateSongRating(song, rating) {
+        return new Promise((resolve) => {
+            const req = {
+                type: UPDATE_SONG_RATING_COMMAND,
+                value: {
+                    song,
+                    rating
+                }
             };
 
             dbRequester.send(req, (result) => {

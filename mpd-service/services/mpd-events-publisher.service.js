@@ -3,7 +3,8 @@ const {
     CURRENT_SONG,
     INCREASE_SONG_PLAYCOUNT,
     CURRENT_MPD_STATUS,
-    CURRENT_PLAYLIST
+    CURRENT_PLAYLIST,
+    CURRENT_SONG_RATING_STICKER_VALUE
 } = require('../mpd-service.contants');
 
 const publisher = new cote.Publisher(
@@ -44,5 +45,18 @@ module.exports = {
      */
     async publishCurrentPlaylist(playlist) {
         await publisher.publish(CURRENT_PLAYLIST, playlist);
+    },
+
+    /**
+     *
+     * @param {string} song
+     * @param {number} rating
+     * @return {Promise<void>}
+     */
+    async publishSongStickerRating(song, rating) {
+        await publisher.publish(CURRENT_SONG_RATING_STICKER_VALUE, {
+            song,
+            rating
+        });
     }
 };

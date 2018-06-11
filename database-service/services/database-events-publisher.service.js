@@ -1,6 +1,9 @@
 const cote = require('cote')({environment: 'mqm'});
 
-const {UPDATE_DATABASE_PROGRESS} = require('../database-service.constants');
+const {
+    UPDATE_DATABASE_PROGRESS,
+    CLEANED_SONG_COUNT
+} = require('../database-service.constants');
 
 const publisher = new cote.Publisher(
     {
@@ -45,5 +48,14 @@ module.exports = {
                 break;
         }
         await publisher.publish(UPDATE_DATABASE_PROGRESS, progress);
+    },
+
+    /**
+     *
+     * @param count
+     * @return {Promise<void>}
+     */
+    async publishCleanedSongCount(count) {
+        await publisher.publish(CLEANED_SONG_COUNT, count);
     }
 };

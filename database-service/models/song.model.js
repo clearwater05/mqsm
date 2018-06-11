@@ -113,8 +113,10 @@ Song.getSongStatistics = async (song) => {
 Song.updateSongStatistic = async (song) => {
     try {
         const savedStatistics = await Song.getSongStatistics(song);
-        savedStatistics.set('lastplayed', new Date());
-        savedStatistics.increment('fmps_playcount');
+        savedStatistics.set({
+            lastplayed: new Date(),
+            fmps_playcount: +savedStatistics.get('fmps_playcount') + 1
+        });
         savedStatistics.save();
     } catch (e) {
         console.log(e);
@@ -160,6 +162,23 @@ Song.cleanUpSongTable = async (fullSongList) => {
         console.log(e);
         return 0;
     }
+};
+
+/**
+ *
+ * @param {string} song
+ * @param {number} rating
+ * @return {Promise<*>}
+ */
+Song.setRating = async (song, rating) => {
+    return await Song.update({
+        rating: +rating,
+        fmps_rating: +rating / 10
+    }, {
+        where: {
+            filename: song
+        }
+    });
 };
 
 Song.sync();

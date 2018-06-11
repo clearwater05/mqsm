@@ -110,7 +110,8 @@ class UpdateDatabaseComponent extends PureComponent {
 
 function mapStateToProps(state) {
     return {
-        progress: state.updateDatabaseReducer.dbUpdateProgress
+        progress: state.updateDatabaseReducer.dbUpdateProgress,
+        cleanedSongCount: state.cleanedSongCount.cleanedSongCount
     };
 }
 

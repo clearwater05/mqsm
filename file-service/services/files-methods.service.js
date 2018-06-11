@@ -179,7 +179,7 @@ module.exports = {
     /**
      *
      * @param {Array} list
-     * @returns {Promise<any[]>}
+     * @returns {Promise<Object[]>}
      */
     async getFilesListMetadata(list) {
         return await Promise.all(list.map(async (item) => {
@@ -216,7 +216,6 @@ module.exports = {
             }
 
             return { ...meta, ...prob, ...details, ...stat };
-            // return Object.assign({}, meta, prob, details, stat);
         }));
     },
 

@@ -11,7 +11,8 @@ const {
     INCREASE_SONG_PLAYCOUNT_COMMAND,
     CURRENT_PLAYLIST_COMMAND,
     REQUEST_SONG_INFO,
-    CLEANUP_DATABASE_COMMAND
+    CLEANUP_DATABASE_COMMAND,
+    UPDATE_SONG_RATING_COMMAND
 } = require('../database-service.constants');
 
 module.exports = () => {
@@ -76,6 +77,14 @@ module.exports = () => {
      */
     dbCommandResponder.on(CLEANUP_DATABASE_COMMAND, async (req, cb) => {
         const result = await songModel.cleanUpSongTable(req.value);
+        await dbEventPublisher.publishCleanedSongCount(result);
         cb(result);
+    });
+
+    dbCommandResponder.on(UPDATE_SONG_RATING_COMMAND, async (req, cb) => {
+        const result = await songModel.setRating(req.value.song, req.value.rating);
+        if (Array.isArray(result) && result[0] === 1) {
+            cb(result);
+        }
     });
 };

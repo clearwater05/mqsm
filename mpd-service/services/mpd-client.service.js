@@ -5,15 +5,17 @@ const { MPD_ADDRESS, MPD_PORT } = require('../mpd-service.config');
 const cmd = mpd.cmd;
 const parseKeyValueMessage = mpd.parseKeyValueMessage;
 const {parseSimplePlaylist} = require('../libs/utils');
+const mpdState = require('./mpd-state.service');
 
 /**
  * @typedef {Object} mpdState
  * @property {string} currentSong
  * @property {string} previousSong
  * @property {Array} currentPlaylist
+ * @property {boolean} statisticLock
  * @type {mpdState}
  */
-let mpdState = {};
+// let mpdState = {};
 
 
 const mpdClient = mpd.connect({
@@ -31,25 +33,18 @@ module.exports = {
 
     /**
      *
-     * @return {mpdState}
-     */
-    getState() {
-        return mpdState;
-    },
-
-    /**
-     *
      * @param {string} currentSong
      * @returns {boolean}
      */
     manageCurrentSong(currentSong) {
+        const cachedCurrentSong = mpdState.getMpdStatePropValue('currentSong');
         let changed = false;
-        if (mpdState.currentSong !== currentSong) {
-            mpdState.previousSong = mpdState.currentSong;
+        if (cachedCurrentSong !== currentSong) {
+            mpdState.setState('previousSong', cachedCurrentSong);
             changed = true;
         }
 
-        mpdState.currentSong = currentSong;
+        mpdState.setState('currentSong', currentSong);
         return changed;
     },
 
@@ -58,7 +53,7 @@ module.exports = {
      * @return {string|*|string}
      */
     getPreviousSong() {
-        return mpdState.previousSong || '';
+        return mpdState.getMpdStatePropValue('previousSong') || '';
     },
 
     /**
@@ -105,7 +100,7 @@ module.exports = {
         try {
             const rawStatus = await this.mpdClientSendCommand(command);
             const status = parseKeyValueMessage(rawStatus);
-            mpdState = {...mpdState, ...status};
+            mpdState.addStatus(status);
 
             return status;
         } catch (e) {
@@ -126,6 +121,14 @@ module.exports = {
         } catch (e) {
             // console.log(e); //TODO error handling
         }
+    },
+
+    /**
+     *
+     * @return {string}
+     */
+    getCachedCurrentSong() {
+        return mpdState.getMpdStatePropValue('currentSong');
     },
 
     /**
@@ -183,7 +186,7 @@ module.exports = {
             if (e.toString().indexOf('no such sticker') !== -1) {
                 return null;
             } else {
-                throw new Error('get sticker problem');
+                console.log(e);
             }
         }
 

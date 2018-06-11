@@ -1,23 +1,14 @@
 const mpdClientService = require('../services/mpd-client.service');
 const eventsPublisher = require('../services/mpd-events-publisher.service');
+const mpdState = require('../services/mpd-state.service');
 const { MPD_STATUS_PUBLISH_DELAY } = require('../mpd-service.config');
 
 const mpdClient = mpdClientService.getMpdClient();
+
 /**
  *
  */
 module.exports = () => {
-    let systemPlayerEvent = false;
-
-    /**
-     *
-     * @param {boolean} state
-     */
-    function setPlayerEventState(state) {
-        systemPlayerEvent = state;
-    }
-
-
     /**
      *
      */
@@ -35,22 +26,16 @@ module.exports = () => {
      *
      */
     mpdClient.on('system-player', async () => {
-        setPlayerEventState(true);
         const song = await mpdClientService.getCurrentSong();
         const status = await mpdClientService.requestCurrentStatus();
-
         const currentSongStateChanged = mpdClientService.manageCurrentSong(song);
 
-        if (currentSongStateChanged && status.state === 'play') {
-            const previousSong = mpdClientService.getPreviousSong();
-            if (previousSong) {
-                await eventsPublisher.updateSongStatistics(previousSong);
-            }
+        if (currentSongStateChanged) {
+            mpdState.toggleStatisticsLock(false);
             await eventsPublisher.publishCurrentSong(song);
         }
 
         await eventsPublisher.publishCurrentStatus(status);
-        setPlayerEventState(false);
     });
 
 
@@ -58,7 +43,11 @@ module.exports = () => {
      *
      */
     mpdClient.on('system-sticker', async () => {
-        console.log('system-sticker');
+        const song = await mpdClientService.getCurrentSong();
+        if (song) {
+            const rating = await mpdClientService.getSongStickerInfo(song, 'rating');
+            eventsPublisher.publishSongStickerRating(song, rating);
+        }
     });
 
     /**
@@ -73,9 +62,21 @@ module.exports = () => {
      *
      */
     setInterval(async () => {
-        if (mpdClientService.getState().state === 'play' && !systemPlayerEvent) {
+        if (mpdState.getMpdStatePropValue('state') === 'play') {
             const status = await mpdClientService.requestCurrentStatus();
             await eventsPublisher.publishCurrentStatus(status);
+            const durationTwoThird = (status.duration / 3) * 2;
+            const elapsed = status.elapsed;
+            const isLocked = mpdState.getMpdStatePropValue('statisticLock');
+
+            if (durationTwoThird < elapsed && !isLocked) {
+                const song = mpdState.getMpdStatePropValue('currentSong');
+                mpdState.toggleStatisticsLock(true);
+
+                if (song) {
+                    await eventsPublisher.updateSongStatistics(song);
+                }
+            }
         }
     }, MPD_STATUS_PUBLISH_DELAY);
 };

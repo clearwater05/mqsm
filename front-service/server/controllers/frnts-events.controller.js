@@ -1,5 +1,6 @@
 const frntFileCommandService = require('../services/frnt-file-commands.service');
 const frntDatabaseCommandsService = require('../services/frnt-database-commands.service');
+const frntMpdCommandService = require('../services/frnt-mpd-commands.service');
 const subscriber = require('../services/frnt-events-subscriber.service');
 
 /**
@@ -23,7 +24,10 @@ const {
     CURRENT_MPD_STATUS_CLIENT,
     CURRENT_PLAYLIST,
     CURRENT_PLAYLIST_CLIENT,
-    CURRENT_SONG_INFO_CLIENT
+    CURRENT_SONG_INFO_CLIENT,
+    CLEANED_SONG_COUNT,
+    CLEANED_SONG_COUNT_CLIENT,
+    CURRENT_SONG_RATING_STICKER_VALUE,
 } = require('../../front.constants');
 
 
@@ -59,7 +63,6 @@ module.exports = (io) => {
      */
     subscriber.on(INCREASE_SONG_PLAYCOUNT, async (song) => {
         const result = await frntDatabaseCommandsService.updateSongStatistics(song);
-        console.log(result);
     });
 
     /**
@@ -92,5 +95,22 @@ module.exports = (io) => {
         cachedRawPlaylist = playlist.slice(0);
         cachedFullPlaylist = songsArrayToSongsObject(result);
         await io.emit('action', {type: CURRENT_PLAYLIST_CLIENT, data: result});
+    });
+
+    /**
+     *
+     */
+    subscriber.on(CLEANED_SONG_COUNT, async (count) => {
+        await io.emit('action', {type: CLEANED_SONG_COUNT_CLIENT, data: count});
+    });
+
+    /**
+     *
+     */
+    subscriber.on(CURRENT_SONG_RATING_STICKER_VALUE, async (value) => {
+        const result = await frntDatabaseCommandsService.updateSongRating(value.song, value.rating);
+        if (Array.isArray(result) && result[0] === 1) {
+            await frntMpdCommandService.requestCurrentSong();
+        }
     });
 };
