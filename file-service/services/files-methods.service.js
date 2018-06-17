@@ -5,9 +5,12 @@ const ffmetadata = require('ffmetadata');
 const ffprobe = require('ffprobe');
 const ffprobeStatic = require('ffprobe-static');
 
-const promisedTimeout = util.promisify(setTimeout);
+const logger = require('./fs-logger.service');
+const { prepareMetaDataTags } = require('../libs/utils');
 
-const {prepareMetaDataTags} = require('../libs/utils');
+const promisedTimeout = util.promisify(setTimeout);
+const scriptName = path.basename(__filename);
+
 const {
     BASE_PATH,
     READ_CHUNK_SIZE,
@@ -33,7 +36,9 @@ module.exports = {
         return new Promise((resolve, reject) => {
             fs.readdir(dir, (err, files) => {
                 if (err) {
-                    reject(err);
+                    const errMsg = `readDirectory(${dir}) failed (${scriptName}): `;
+                    logger.errorLog(errMsg, err);
+                    reject(errMsg, err);
                 }
                 resolve(files);
             });
@@ -69,7 +74,9 @@ module.exports = {
 
             fs.readFile(`${dir}/${cover}`, (err, data) => {
                 if (err) {
-                    reject(err);
+                    const errMsg = `readCoverFile(${cover}) failed (${scriptName}): `;
+                    logger.errorLog(errMsg, err);
+                    reject(errMsg, err);
                 }
 
                 resolve(`data:image/${ext};base64,${data.toString('base64')}`);
@@ -82,11 +89,15 @@ module.exports = {
      * @param {string} dirName
      */
     async getCover(dirName) {
-        const files = await this.readDirectory(dirName);
-        const coverName = this.searchForCover(files);
-        const cover = await this.readCoverFile({dirName, coverName});
-
-        return cover;
+        try {
+            const files = await this.readDirectory(dirName);
+            const coverName = this.searchForCover(files);
+            const cover = await this.readCoverFile({dirName, coverName});
+            return cover;
+        } catch (e) {
+            const errMsg = `getCover(${dirName}) failed (${scriptName}): `;
+            logger.errorLog(errMsg, e);
+        }
     },
 
     /********************************** Metadata **************************/
@@ -101,6 +112,8 @@ module.exports = {
 
             ffmetadata.read(file, (err, data) => {
                 if (err) {
+                    const errMsg = `getMetadata(${file}) failed (${scriptName}): `;
+                    logger.errorLog(errMsg, err);
                     reject(err);
                     return;
                 }
@@ -120,6 +133,8 @@ module.exports = {
             const file = this.getFullPath(rawFileName);
             ffprobe(file, {path: ffprobeStatic.path}, (err, data) => {
                 if (err) {
+                    const errMsg = `getFileInfo(${file}) failed (${scriptName}): `;
+                    logger.errorLog(errMsg, err);
                     reject(err);
                     return;
                 }
@@ -140,6 +155,8 @@ module.exports = {
             const file = this.getFullPath(rawFileName);
             fs.stat(file, (err, stats) => {
                 if (err) {
+                    const errMsg = `getFileStat(${file}) failed (${scriptName}): `;
+                    logger.errorLog(errMsg, err);
                     reject(err);
                 }
                 const mtime = stats.mtimeMs;
@@ -164,12 +181,16 @@ module.exports = {
             const statFile = path.join(pathObj.dir, `${pathObj.name}.json`);
             fs.readFile(statFile, (err, rawData) => {
                 if (err) {
+                    const errMsg = `getSongSavedStatistics(${file}) failed (${scriptName}): `;
+                    logger.errorLog(errMsg, err);
                     reject(err);
                 }
 
                 try {
                     resolve(JSON.parse(rawData));
                 } catch (e) {
+                    const errMsg = `Wrong metadata getSongSavedStatistics(${file}) (${scriptName}): `;
+                    logger.errorLog(errMsg, e);
                     reject(e);
                 }
             });
@@ -194,7 +215,6 @@ module.exports = {
                 meta = {
                     filename: file
                 };
-                //TODO error handling
             }
 
             try {

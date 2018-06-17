@@ -1,4 +1,4 @@
-import {UPDATE_DATABASE_PROGRESS_CLIENT} from '../../../front.constants';
+import {UPDATE_DATABASE_PROGRESS_CLIENT} from '../../front.constants';
 
 const initialState = {
     dbUpdateProgress: {}

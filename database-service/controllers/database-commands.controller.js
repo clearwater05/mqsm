@@ -1,8 +1,12 @@
 const util = require('util');
+const path = require('path');
 
 const dbCommandResponder = require('../services/database-command-responder.service');
 const dbEventPublisher = require('../services/database-events-publisher.service');
 const songModel = require('../models/song.model');
+const logger = require('../services/database-logger.service');
+
+const scriptName = path.basename(__filename);
 
 const promisedTimeout = util.promisify(setTimeout);
 
@@ -20,13 +24,10 @@ module.exports = () => {
      *
      */
     dbCommandResponder.on(REQUEST_SONG_INFO, async (req, cb) => {
-        try {
-            const song = req.value;
-            const songInfo = await songModel.getSongInfo(song)
-            cb(songInfo.toJSON());
-        } catch (e) {
-            console.log(e);
-            cb({});
+        const song = req.value;
+        const songInfo = await songModel.getSongInfo(song);
+        if (songInfo) {
+            cb(songInfo);
         }
     });
 
@@ -47,11 +48,12 @@ module.exports = () => {
 
                 await dbEventPublisher.publishProgress('finish', list.length);
             }
+            cb(true);
         } catch (e) {
-            console.log(e);
-            //TODO error handler
+            const errMsg = `dbCommandResponder.on(UPDATE_DATABASE) (${scriptName}): `;
+            logger.errorLog(errMsg, e);
+            cb(false);
         }
-        cb(true);
     });
 
     /**
@@ -61,7 +63,7 @@ module.exports = () => {
         const song = req.value;
         const result = await songModel.updateSongStatistic(song);
 
-        cb(true);
+        cb(result);
     });
 
     /**

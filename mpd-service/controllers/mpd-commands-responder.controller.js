@@ -23,7 +23,11 @@ module.exports = () => {
      */
     responder.on(REQUEST_CURRENT_SONG, async (req, cb) => {
         const song = await mpdClientService.getCurrentSong();
-        await eventsPublisher.publishCurrentSong(song);
-        cb('current song');
+        if (song) {
+            await eventsPublisher.publishCurrentSong(song);
+            cb(true);
+            return;
+        }
+        cb(false);
     });
 };

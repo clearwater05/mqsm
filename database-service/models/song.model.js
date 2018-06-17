@@ -1,8 +1,11 @@
+const path = require('path');
 const Sequelize = require('sequelize');
 
 const {mapMetaTagsToProps} = require('../libs/utils');
 const sequelize = require('../services/sequelize.service');
+const logger = require('../services/database-logger.service');
 
+const scriptName = path.basename(__filename);
 const Op = Sequelize.Op;
 
 const Song = sequelize.define('song', {
@@ -62,7 +65,7 @@ const Song = sequelize.define('song', {
 /**
  *
  * @param song
- * @return {Promise<Model>}
+ * @return {Promise<*>}
  */
 Song.getSongInfo = async (song) => {
     try {
@@ -70,9 +73,12 @@ Song.getSongInfo = async (song) => {
             where: {
                 filename: song
             }
+        }).then((found) => {
+            return found.toJSON();
         });
     } catch (e) {
-        console.log(e);
+        const errMsg = `getSongInfo(${song}) failed: (${scriptName}): `;
+        logger.errorLog(errMsg, e);
     }
 };
 
@@ -86,8 +92,8 @@ Song.songUpsert = async (songInfo) => {
         const props = mapMetaTagsToProps(songInfo);
         await Song.upsert(props);
     } catch (e) {
-        console.log(e);
-        //TODO error handler
+        const errMsg = `songUpsert(${song}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
     }
 };
 
@@ -111,16 +117,23 @@ Song.getSongStatistics = async (song) => {
  * @return {Promise<void>}
  */
 Song.updateSongStatistic = async (song) => {
-    try {
-        const savedStatistics = await Song.getSongStatistics(song);
-        savedStatistics.set({
-            lastplayed: new Date(),
-            fmps_playcount: +savedStatistics.get('fmps_playcount') + 1
+    const savedStatistics = await Song.getSongStatistics(song);
+    savedStatistics.set({
+        lastplayed: new Date(),
+        fmps_playcount: +savedStatistics.get('fmps_playcount') + 1
+    });
+    await savedStatistics
+        .save(
+            {
+                fields: ['lastplayed', 'fmps_playcount']
+            }
+        )
+        .then(() => true)
+        .catch(() => {
+            const errMsg = `updateSongStatistic(${song}) failed (${scriptName}): `;
+            logger.errorLog(errMsg, e);
+            return null;
         });
-        savedStatistics.save();
-    } catch (e) {
-        console.log(e);
-    }
 };
 
 /**
@@ -138,7 +151,8 @@ Song.getPlaylist = async (rawList) => {
             }
         });
     } catch (e) {
-        console.log(e);
+        const errMsg = `getPlaylist() failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
     }
 };
 
@@ -159,7 +173,8 @@ Song.cleanUpSongTable = async (fullSongList) => {
 
         return (cleaned);
     } catch (e) {
-        console.log(e);
+        const errMsg = `cleanUpSongTable(${fullSongList}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
         return 0;
     }
 };
@@ -171,14 +186,20 @@ Song.cleanUpSongTable = async (fullSongList) => {
  * @return {Promise<*>}
  */
 Song.setRating = async (song, rating) => {
-    return await Song.update({
-        rating: +rating,
-        fmps_rating: +rating / 10
-    }, {
-        where: {
-            filename: song
-        }
-    });
+    try {
+        return await Song.update({
+            rating: +rating,
+            fmps_rating: +rating / 10
+        }, {
+            where: {
+                filename: song
+            }
+        });
+    } catch (e) {
+        const errMsg = `setRating(${song}, ${rating}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+        return null;
+    }
 };
 
 Song.sync();

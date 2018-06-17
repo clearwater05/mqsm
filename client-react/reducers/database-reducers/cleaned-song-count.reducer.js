@@ -1,4 +1,4 @@
-import {CLEANED_SONG_COUNT_CLIENT} from '../../../front.constants';
+import {CLEANED_SONG_COUNT_CLIENT} from '../../front.constants';
 
 const initialState = {
     cleanedSongCount: null

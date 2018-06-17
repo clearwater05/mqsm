@@ -4,3 +4,4 @@ front-service/server/public/css
 front-service/server/public/js
 database-service/data/mqm.db
 package-lock.json
+mqsm.log

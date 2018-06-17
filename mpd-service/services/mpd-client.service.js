@@ -1,11 +1,13 @@
 const mpd = require('mpd');
+const path = require('path');
 
-const { MPD_ADDRESS, MPD_PORT } = require('../mpd-service.config');
+const {parseSimplePlaylist} = require('../libs/utils');
+const mpdState = require('./mpd-state.service');
+const logger = require('./mpd-logger.service');
 
 const cmd = mpd.cmd;
 const parseKeyValueMessage = mpd.parseKeyValueMessage;
-const {parseSimplePlaylist} = require('../libs/utils');
-const mpdState = require('./mpd-state.service');
+const scriptName = path.basename(__filename);
 
 /**
  * @typedef {Object} mpdState
@@ -15,8 +17,11 @@ const mpdState = require('./mpd-state.service');
  * @property {boolean} statisticLock
  * @type {mpdState}
  */
-// let mpdState = {};
 
+const {
+    MPD_ADDRESS,
+    MPD_PORT
+} = require('../mpd-service.config');
 
 const mpdClient = mpd.connect({
     port: MPD_PORT,
@@ -39,12 +44,15 @@ module.exports = {
     manageCurrentSong(currentSong) {
         const cachedCurrentSong = mpdState.getMpdStatePropValue('currentSong');
         let changed = false;
-        if (cachedCurrentSong !== currentSong) {
+        if (cachedCurrentSong !== currentSong && currentSong) {
             mpdState.setState('previousSong', cachedCurrentSong);
             changed = true;
         }
 
-        mpdState.setState('currentSong', currentSong);
+        if (currentSong) {
+            mpdState.setState('currentSong', currentSong);
+        }
+
         return changed;
     },
 
@@ -65,6 +73,8 @@ module.exports = {
         return new Promise((resolve, reject) => {
             mpdClient.sendCommand((command), (err, msg) => {
                 if (err) {
+                    const errMsg = `mpdClientSendCommand(${command}) failed (72: ${scriptName}): `;
+                    logger.errorLog(errMsg, err);
                     reject(err);
                 }
                 resolve(msg);
@@ -104,7 +114,9 @@ module.exports = {
 
             return status;
         } catch (e) {
-            // console.log(e); //TODO error handling
+            const errMsg = `requestCurrentStatus() failed (107: ${scriptName}): `;
+            logger.errorLog(errMsg, e);
+            return null;
         }
     },
 
@@ -119,7 +131,9 @@ module.exports = {
             const song = parseKeyValueMessage(rawSong);
             return song.file;
         } catch (e) {
-            // console.log(e); //TODO error handling
+            const errMsg = `getCurrentSong() failed (127: ${scriptName}): `;
+            logger.errorLog(errMsg, e);
+            return null;
         }
     },
 
@@ -155,7 +169,9 @@ module.exports = {
             }
             return list;
         } catch (e) {
-            // console.log(e); //TODO error handling
+            const errMsg = `getSongList(${filter}) failed (153: ${scriptName}): `;
+            logger.errorLog(errMsg, e);
+            return [];
         }
     },
 
@@ -165,8 +181,15 @@ module.exports = {
      */
     async getCurrentPlaylist() {
         const command = cmd('playlist', []);
-        const rawPlaylist = await this.mpdClientSendCommand(command);
-        return parseSimplePlaylist(rawPlaylist);
+        try {
+            const rawPlaylist = await this.mpdClientSendCommand(command);
+
+            return parseSimplePlaylist(rawPlaylist);
+        } catch (e) {
+            const errMsg = `getCurrentPlaylist() failed (182: ${scriptName}): `;
+            logger.errorLog(errMsg, e);
+            return [];
+        }
     },
 
     /**
@@ -184,9 +207,13 @@ module.exports = {
             return (sticker.sticker.split('=')[1]);
         } catch (e) {
             if (e.toString().indexOf('no such sticker') !== -1) {
+                const msg = `No such sticker getSongStickerInfo(${song}, ${stickerName}) - (200: ${scriptName}): `;
+                logger.eventLog(msg, {song, stickerName});
                 return null;
             } else {
-                console.log(e);
+                const errMsg = `getSongStickerInfo(${song}, ${stickerName}) failed (200: ${scriptName}): `;
+                logger.errorLog(errMsg, e);
+                return null;
             }
         }
 

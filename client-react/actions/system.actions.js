@@ -3,7 +3,7 @@ import {
     UPDATE_DATABASE_SINCE,
     UPDATE_DATABASE_DIR_NAME,
     CLEANUP_DATABASE
-} from '../../front.constants';
+} from '../front.constants';
 
 /**
  *

@@ -1,16 +1,15 @@
-import { CURRENT_SONG_INFO_CLIENT } from '../../../front.constants';
+import {CURRENT_PLAYLIST_CLIENT} from '../../front.constants';
 
 const initialState = {
-    currentSong: {}
+    currentPlaylist: {}
 };
 
 export default (state = initialState, action) => {
     switch (action.type) {
-        case CURRENT_SONG_INFO_CLIENT:
-            console.log(action.data);
+        case CURRENT_PLAYLIST_CLIENT:
             return {
                 ...state,
-                currentSong: action.data
+                currentPlaylist: action.data
             };
         default:
             return state;

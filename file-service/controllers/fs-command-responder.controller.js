@@ -23,9 +23,12 @@ module.exports = () => {
      */
     responder.on(REQUEST_FILE_METADATA, async (req, cb) => {
         const file = fileMethods.getFullPath(req.value);
-        const metadata = await fileMethods.getMetadata(file);
-
-        cb(metadata);
+        try {
+            const metadata = await fileMethods.getMetadata(file);
+            cb(metadata);
+        } catch (e) {
+            cb({filename: file});
+        }
     });
 
     /**

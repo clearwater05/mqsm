@@ -15,10 +15,15 @@ module.exports = () => {
     mpdClient.on('ready', async () => {
         const song = await mpdClientService.getCurrentSong();
         const status = await mpdClientService.requestCurrentStatus();
-        mpdClientService.manageCurrentSong(song);
 
-        eventsPublisher.publishCurrentSong(song);
-        eventsPublisher.publishCurrentStatus(status);
+        if (song) {
+            mpdClientService.manageCurrentSong(song);
+            eventsPublisher.publishCurrentSong(song);
+        }
+
+        if (status) {
+            eventsPublisher.publishCurrentStatus(status);
+        }
     });
 
 
@@ -30,12 +35,14 @@ module.exports = () => {
         const status = await mpdClientService.requestCurrentStatus();
         const currentSongStateChanged = mpdClientService.manageCurrentSong(song);
 
-        if (currentSongStateChanged) {
+        if (currentSongStateChanged && song) {
             mpdState.toggleStatisticsLock(false);
             await eventsPublisher.publishCurrentSong(song);
         }
 
-        await eventsPublisher.publishCurrentStatus(status);
+        if (status) {
+            await eventsPublisher.publishCurrentStatus(status);
+        }
     });
 
 
@@ -46,7 +53,9 @@ module.exports = () => {
         const song = await mpdClientService.getCurrentSong();
         if (song) {
             const rating = await mpdClientService.getSongStickerInfo(song, 'rating');
-            eventsPublisher.publishSongStickerRating(song, rating);
+            if (rating) {
+                eventsPublisher.publishSongStickerRating(song, rating);
+            }
         }
     });
 
@@ -64,17 +73,19 @@ module.exports = () => {
     setInterval(async () => {
         if (mpdState.getMpdStatePropValue('state') === 'play') {
             const status = await mpdClientService.requestCurrentStatus();
-            await eventsPublisher.publishCurrentStatus(status);
-            const durationTwoThird = (status.duration / 3) * 2;
-            const elapsed = status.elapsed;
-            const isLocked = mpdState.getMpdStatePropValue('statisticLock');
+            if (status) {
+                eventsPublisher.publishCurrentStatus(status);
+                const durationTwoThird = (status.duration / 3) * 2;
+                const elapsed = status.elapsed;
+                const isLocked = mpdState.getMpdStatePropValue('statisticLock');
 
-            if (durationTwoThird < elapsed && !isLocked) {
-                const song = mpdState.getMpdStatePropValue('currentSong');
-                mpdState.toggleStatisticsLock(true);
+                if (durationTwoThird < elapsed && !isLocked) {
+                    const song = mpdState.getMpdStatePropValue('currentSong');
+                    mpdState.toggleStatisticsLock(true);
 
-                if (song) {
-                    await eventsPublisher.updateSongStatistics(song);
+                    if (song) {
+                        eventsPublisher.updateSongStatistics(song);
+                    }
                 }
             }
         }

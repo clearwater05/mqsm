@@ -13,8 +13,14 @@ const publisher = new cote.Publisher(
     }
 );
 
-
 module.exports = {
+    /**
+     *
+     * @return {*}
+     */
+    getPublisher() {
+        return publisher;
+    },
     /**
      *
      * @param {string} currentSong

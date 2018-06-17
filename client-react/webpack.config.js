@@ -5,14 +5,14 @@ const context = {
         return __dirname + (path !== undefined ? path : '');
     },
     output: (path) => {
-        return __dirname + '/server/public' + (path !== undefined ? path : '');
+        return __dirname + '/../front-service/server/public' + (path !== undefined ? path : '');
     }
 };
 
 module.exports = {
     mode: 'development',
     entry: {
-        app: context.source('/client/index.js')
+        app: context.source('/index.js')
     },
     output: {
         path: context.output(),

@@ -1,15 +1,15 @@
-import {CURRENT_PLAYLIST_CLIENT} from '../../../front.constants';
+import { CURRENT_MPD_STATUS_CLIENT } from '../../front.constants';
 
 const initialState = {
-    currentPlaylist: {}
+    mpdState: {}
 };
 
 export default (state = initialState, action) => {
     switch (action.type) {
-        case CURRENT_PLAYLIST_CLIENT:
+        case CURRENT_MPD_STATUS_CLIENT:
             return {
                 ...state,
-                currentPlaylist: action.data
+                mpdState: action.data
             };
         default:
             return state;

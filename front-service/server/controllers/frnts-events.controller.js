@@ -2,6 +2,7 @@ const frntFileCommandService = require('../services/frnt-file-commands.service')
 const frntDatabaseCommandsService = require('../services/frnt-database-commands.service');
 const frntMpdCommandService = require('../services/frnt-mpd-commands.service');
 const subscriber = require('../services/frnt-events-subscriber.service');
+const logger = require('../services/frnt-logger.service');
 
 /**
  *
@@ -28,6 +29,10 @@ const {
     CLEANED_SONG_COUNT,
     CLEANED_SONG_COUNT_CLIENT,
     CURRENT_SONG_RATING_STICKER_VALUE,
+    SYSTEM_ERROR_CLIENT,
+    SYSTEM_MESSAGE_CLIENT,
+    SYSTEM_EVENT,
+    SYSTEM_ERROR
 } = require('../../front.constants');
 
 
@@ -63,6 +68,9 @@ module.exports = (io) => {
      */
     subscriber.on(INCREASE_SONG_PLAYCOUNT, async (song) => {
         const result = await frntDatabaseCommandsService.updateSongStatistics(song);
+        if (result) {
+            await frntMpdCommandService.requestCurrentSong();
+        }
     });
 
     /**
@@ -112,5 +120,21 @@ module.exports = (io) => {
         if (Array.isArray(result) && result[0] === 1) {
             await frntMpdCommandService.requestCurrentSong();
         }
+    });
+
+    /**
+     *
+     */
+    subscriber.on(SYSTEM_ERROR, async (value) => {
+        logger.errorLog(value.message, value.error, value.when);
+        await io.emit('action', {type: SYSTEM_ERROR_CLIENT, data: value});
+    });
+
+    /**
+     *
+     */
+    subscriber.on(SYSTEM_EVENT, async (value) => {
+        logger.eventLog(value.message, value.event, value.when);
+        await io.emit('action', {type: SYSTEM_MESSAGE_CLIENT, data: value});
     });
 };
