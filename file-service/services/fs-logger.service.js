@@ -1,4 +1,4 @@
-const publisher = require('./fs-publisher-service');
+const publisher = require('./fs-publisher-service').getPuplisher();
 
 const {
     SYSTEM_ERROR,

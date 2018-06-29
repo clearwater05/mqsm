@@ -1,0 +1,29 @@
+.mqsm-database-maintenance-component {
+  .mqsm-database-maintenance-section {
+    padding: 12px 0;
+
+    .mqsm-update-database-dir-component {
+      position: relative;
+      .mqsm-dirs-select-list {
+        position: absolute;
+        min-width: 240px;
+        height: auto;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 3px;
+        border: 1px solid $pt-dark-code-background-color;
+        color: $pt-dark-text-color;
+        border-radius: $pt-border-radius;
+        box-shadow: $pt-dark-popover-box-shadow;
+        background-color: $dark-gray4;
+        .mqsm-dir-list-option {
+          padding: 4px;
+          &:hover {
+            cursor: pointer;
+            background-color: $dark-gray3;
+          }
+        }
+      }
+    }
+  }
+}

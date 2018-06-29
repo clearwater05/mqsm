@@ -1,13 +1,15 @@
-import {UPDATE_DATABASE_PROGRESS_CLIENT} from '../../front.constants';
+import { DIR_LIST_CLIENT } from '../../front.constants';
 
-const initialState = {};
+const initialState = {
+    readDir: []
+};
 
 export default (state = initialState, action) => {
     switch (action.type) {
-        case UPDATE_DATABASE_PROGRESS_CLIENT:
+        case DIR_LIST_CLIENT:
             return {
                 ...state,
-                ...action.data
+                readDir: [...action.data]
             };
         default:
             return state;

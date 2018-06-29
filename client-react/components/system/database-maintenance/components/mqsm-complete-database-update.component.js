@@ -1,0 +1,12 @@
+import React from 'react';
+import { Button } from '@blueprintjs/core';
+
+
+export default (props) => {
+    return (
+        <div>
+            <h5>Complete Database Update</h5>
+            <Button>Update</Button>
+        </div>
+    );
+};

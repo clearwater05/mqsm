@@ -4,7 +4,8 @@ const path = require('path');
 const {
     REQUEST_COVER,
     REQUEST_FILE_METADATA,
-    REQUEST_FILES_LIST_METADATA
+    REQUEST_FILES_LIST_METADATA,
+    REQUEST_DIR_LIST
 } = require('../../front.constants');
 
 const fsRequester = new cote.Requester({
@@ -76,6 +77,23 @@ module.exports = {
             } else {
                 reject();
             }
+        });
+    },
+
+    /**
+     *
+     * @param baseDir
+     */
+    requestDirList(baseDir) {
+        return new Promise((resolve) => {
+            const req = {
+                type: REQUEST_DIR_LIST,
+                value: baseDir
+            };
+
+            fsRequester.send(req, (res) => {
+                resolve(res);
+            });
         });
     }
 };

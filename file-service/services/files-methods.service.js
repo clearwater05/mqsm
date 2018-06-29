@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const ls = require('ls');
 const util = require('util');
 const ffmetadata = require('ffmetadata');
 const ffprobe = require('ffprobe');
@@ -254,5 +255,24 @@ module.exports = {
         }
 
         return result;
+    },
+
+    /************************* Other requests *****************************/
+    /**
+     *
+     * @param search
+     * @return {Promise<*>}
+     */
+    async getDirList(search) {
+        return new Promise((resolve) => {
+            const dirToRead = path.join(BASE_PATH, `${search}*`);
+            const dirs = [];
+            for (let file of ls(dirToRead)) {
+                if (file.stat.isDirectory()) {
+                    dirs.push(file.full.slice(BASE_PATH.length + 1));
+                }
+            }
+            resolve(dirs);
+        });
     }
 };

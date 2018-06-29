@@ -42,6 +42,7 @@ module.exports = {
             case 'ongoing':
                 progress.state = state;
                 progress.done = done;
+                progress.total = total;
                 break;
             case 'start':
                 progress.state = state;

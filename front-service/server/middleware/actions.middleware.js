@@ -1,11 +1,14 @@
 const frntCommandsController = require('../controllers/frnt-commands.controller');
 const frntPublisher = require('../services/frnt-service-publisher.service');
+const frntFileCommandService = require('../services/frnt-file-commands.service');
 
 const {
     UPDATE_DATABASE,
     UPDATE_DATABASE_SINCE,
     UPDATE_DATABASE_DIR_NAME,
-    CLEANUP_DATABASE
+    CLEANUP_DATABASE,
+    REQUEST_DIR_LIST,
+    DIR_LIST_CLIENT
 } = require('../../front.constants');
 
 
@@ -15,7 +18,7 @@ const {
  * @param next
  */
 module.exports = (socket, next) => {
-    socket.on('action', (data) => {
+    socket.on('action', async (data) => {
         switch (data.type) {
             case UPDATE_DATABASE: {
                 frntCommandsController.updateDatabaseSongsList(data.value);
@@ -27,6 +30,12 @@ module.exports = (socket, next) => {
                     value: data.value
                 };
                 frntCommandsController.updateDatabaseSongsList(filterValue);
+                break;
+            }
+            case REQUEST_DIR_LIST: {
+                const baseDir = data.value;
+                const dirList = await frntFileCommandService.requestDirList(baseDir);
+                socket.emit('action', {type: DIR_LIST_CLIENT, data: [...dirList]});
                 break;
             }
             case UPDATE_DATABASE_DIR_NAME: {

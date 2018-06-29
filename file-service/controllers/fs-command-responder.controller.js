@@ -4,7 +4,8 @@ const fileMethods = require('../services/files-methods.service');
 const {
     REQUEST_COVER,
     REQUEST_FILE_METADATA,
-    REQUEST_FILES_LIST_METADATA
+    REQUEST_FILES_LIST_METADATA,
+    REQUEST_DIR_LIST
 } = require('../file-service.constants');
 
 module.exports = () => {
@@ -39,5 +40,14 @@ module.exports = () => {
         const result = await fileMethods.proceedFilesQueue(completeList);
 
         cb(result);
+    });
+
+    /**
+     *
+     */
+    responder.on(REQUEST_DIR_LIST, async (req, cb) => {
+        const dirList = await fileMethods.getDirList(req.value);
+
+        cb(dirList);
     });
 };

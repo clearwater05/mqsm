@@ -2,7 +2,8 @@ import {
     UPDATE_DATABASE,
     UPDATE_DATABASE_SINCE,
     UPDATE_DATABASE_DIR_NAME,
-    CLEANUP_DATABASE
+    CLEANUP_DATABASE,
+    REQUEST_DIR_LIST
 } from '../front.constants';
 
 /**
@@ -41,10 +42,21 @@ export function updateDatabaseFromDirName(dirName) {
 
 /**
  *
- * @return {{type: string, value: string}}
+ * @return {{type: string}}
  */
 export function databaseCleanUp() {
     return {
         type: CLEANUP_DATABASE
+    };
+}
+
+/**
+ *
+ * @param baseDir
+ */
+export function requestDirList(baseDir) {
+    return {
+        type: REQUEST_DIR_LIST,
+        value: baseDir
     };
 }
