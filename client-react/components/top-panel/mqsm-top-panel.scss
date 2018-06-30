@@ -1,3 +1,21 @@
 .mqsm-navbar-container {
-  height: 60px;
+  height: 90px;
+  .mqsm-top-navigation-group {
+    height: 90px;
+    .mqsm-status-wrapper {
+      min-width: 700px;
+      .mqsm-current-song-progress {
+
+      }
+      .mqsm-current-song-info {
+        .mqsm-title-info {
+          white-space: nowrap;
+        }
+        .mqsm-artist-album-info {
+          font-size: $mqsm-small-font;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
 }

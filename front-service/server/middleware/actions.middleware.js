@@ -1,6 +1,7 @@
 const frntCommandsController = require('../controllers/frnt-commands.controller');
 const frntPublisher = require('../services/frnt-service-publisher.service');
 const frntFileCommandService = require('../services/frnt-file-commands.service');
+const frntMpdService = require('../services/frnt-mpd-commands.service');
 
 const {
     UPDATE_DATABASE,
@@ -8,7 +9,15 @@ const {
     UPDATE_DATABASE_DIR_NAME,
     CLEANUP_DATABASE,
     REQUEST_DIR_LIST,
-    DIR_LIST_CLIENT
+    DIR_LIST_CLIENT,
+    REQUEST_CURRENT_SONG,
+    REQUEST_MPD_STATUS,
+    CURRENT_MPD_STATUS_CLIENT,
+    REQUEST_STOP,
+    REQUEST_PLAY,
+    REQUEST_NEXT,
+    REQUEST_PREVIOUS,
+    REQUEST_PAUSE
 } = require('../../front.constants');
 
 
@@ -48,6 +57,24 @@ module.exports = (socket, next) => {
             }
             case CLEANUP_DATABASE:
                 frntCommandsController.databaseCleanup();
+                break;
+            case REQUEST_CURRENT_SONG: {
+                frntMpdService.requestCurrentSong();
+                break;
+            }
+            case REQUEST_MPD_STATUS: {
+                const status = await frntMpdService.requestMPDStatus();
+                if (status) {
+                    socket.emit('action', {type: CURRENT_MPD_STATUS_CLIENT, data: {...status}});
+                }
+                break;
+            }
+            case REQUEST_STOP:
+            case REQUEST_PLAY:
+            case REQUEST_NEXT:
+            case REQUEST_PREVIOUS:
+            case REQUEST_PAUSE:
+                frntMpdService.sendMPDCommand(data.type);
                 break;
             default: {
                 frntPublisher.publishEvents(data.type);

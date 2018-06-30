@@ -39,8 +39,7 @@ module.exports = {
                 use: ['style-loader', MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
             },
             {
-                test: /\.(png|jpg|svg|ttf|eot|woff|woff2)$/,
-                include: /\/node_modules\//,
+                test: /\.(png|jpg|svg|ttf|eot|woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
                 use: [
                     {
                         loader: 'file-loader',

@@ -1,0 +1,22 @@
+.star {
+  font-family: FontAwesome;
+  font-size: 14px;
+  i:before {
+    font-size: 14px;
+  }
+}
+
+.star.icon i.star-empty:before,
+.rating.star-icon i.star-empty:before {
+  content: "\F006";
+}
+
+.star.icon i.star-half:before,
+.rating.star-icon i.star-half:before {
+  content: "\F123";
+}
+
+.star.icon i.star-filled:before,
+.rating.star-icon i.star-filled:before {
+  content: "\F005";
+}

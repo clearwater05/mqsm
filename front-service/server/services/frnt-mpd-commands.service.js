@@ -1,7 +1,9 @@
 const cote = require('cote')({environment: 'mqm'});
 const {
     REQUEST_SONGS_LIST,
-    REQUEST_CURRENT_SONG
+    REQUEST_CURRENT_SONG,
+    REQUEST_MPD_STATUS,
+    MPD_PLAYER_COMMAND
 } = require('../../front.constants');
 
 const mpdRequester = new cote.Requester({
@@ -33,11 +35,46 @@ module.exports = {
 
     /**
      *
+     * @return {Promise<any>}
      */
     requestCurrentSong() {
         return new Promise((resolve) => {
             const req = {
                 type: REQUEST_CURRENT_SONG
+            };
+
+            mpdRequester.send(req, (res) => {
+                resolve(res);
+            });
+        });
+    },
+
+    /**
+     *
+     * @return {Promise<any>}
+     */
+    requestMPDStatus() {
+        return new Promise((resolve) => {
+            const req = {
+                type: REQUEST_MPD_STATUS
+            };
+
+            mpdRequester.send(req, (res) => {
+                resolve(res);
+            });
+        });
+    },
+
+    /**
+     *
+     * @param {string} command
+     * @return {Promise<any>}
+     */
+    sendMPDCommand(command) {
+        return new Promise((resolve) => {
+            const req = {
+                type: MPD_PLAYER_COMMAND,
+                value: command
             };
 
             mpdRequester.send(req, (res) => {

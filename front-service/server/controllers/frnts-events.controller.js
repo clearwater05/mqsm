@@ -45,7 +45,7 @@ module.exports = (io) => {
      *
      */
     subscriber.on(CURRENT_MPD_STATUS, (status) => {
-        io.emit('action', {type: CURRENT_MPD_STATUS_CLIENT, data: status});
+        io.emit('action', {type: CURRENT_MPD_STATUS_CLIENT, data: {...status}});
     });
 
     /**
@@ -59,7 +59,8 @@ module.exports = (io) => {
             songInfo.cover = cover;
             await io.emit('action', {type: CURRENT_SONG_INFO_CLIENT, data: {...songInfo}});
         } catch (e) {
-            console.log(e);
+            // console.log(e);
+            // logger.errorLog('');
         }
     });
 

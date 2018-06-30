@@ -217,5 +217,20 @@ module.exports = {
             }
         }
 
+    },
+
+    /**
+     *
+     * @param {string} playerCommand
+     * @return {Promise<void>}
+     */
+    async sendPlayerCommand(playerCommand) {
+        const command = cmd(playerCommand, []);
+        try {
+            await this.mpdClientSendCommand(command);
+        } catch (e) {
+            const errMsg = `sendPlayerCommand(${command}) failed (222: ${scriptName}): `;
+            logger.errorLog(errMsg, e);
+        }
     }
 };
