@@ -14,7 +14,7 @@
     },
     {
       "name": "frontend-service",
-      "script": "front-service/server/frontend-service.js",
+      "script": "front-service/server/front-service.js",
       "watch": "front-service/server",
       "ignore_watch" : ["node_modules", "front-service/server/public"]
     },

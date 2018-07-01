@@ -1,5 +1,4 @@
 const cote = require('cote')({environment: 'mqm'});
-const path = require('path');
 
 const {
     REQUEST_COVER,
@@ -16,15 +15,15 @@ const fsRequester = new cote.Requester({
 module.exports = {
     /**
      *
-     * @param {string} song
+     * @param {string} albumPath
      * @returns {Promise<any>}
      */
-    getCoverForAlbum(song) {
+    getCoverForAlbum(albumPath) {
         return new Promise((resolve, reject) => {
-            if (song) {
+            if (albumPath) {
                 const req = {
                     type: REQUEST_COVER,
-                    value: path.dirname(song)
+                    value: albumPath
                 };
 
                 fsRequester.send(req, (res) => {

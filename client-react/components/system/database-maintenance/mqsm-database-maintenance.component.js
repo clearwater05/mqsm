@@ -140,7 +140,7 @@ class MQSMDatabaseMaintenance extends Component {
                 <div className="row">
                     <div className="col-6">
                         <div className={this.sectionClass}>
-                            <CompleteUpdate/>
+                            <CompleteUpdate onUpdateRequest={this.completeDBUpdate}/>
                         </div>
                         <div className={this.sectionClass}>
                             <UpdateFromDir handleDirChange={this.handleDirChange}

@@ -6,7 +6,7 @@ export default (props) => {
     return (
         <div>
             <h5>Complete Database Update</h5>
-            <Button>Update</Button>
+            <Button onClick={props.onUpdateRequest}>Update</Button>
         </div>
     );
 };

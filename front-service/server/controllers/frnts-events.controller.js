@@ -1,20 +1,9 @@
+const path = require('path');
 const frntFileCommandService = require('../services/frnt-file-commands.service');
 const frntDatabaseCommandsService = require('../services/frnt-database-commands.service');
 const frntMpdCommandService = require('../services/frnt-mpd-commands.service');
 const subscriber = require('../services/frnt-events-subscriber.service');
 const logger = require('../services/frnt-logger.service');
-
-/**
- *
- * @param {Object[]} arr
- * @return {Object}
- */
-function songsArrayToSongsObject(arr) {
-    return arr.reduce((obj, song) => {
-        obj[song.filename] = {...song};
-        return obj;
-    }, {});
-}
 
 const {
     CURRENT_MPD_STATUS,
@@ -35,7 +24,10 @@ const {
     SYSTEM_ERROR
 } = require('../../front.constants');
 
-
+const {
+    groupPlaylistByAlbum,
+    songsArrayToSongsObject
+} = require('../libs/frnt-utils');
 
 module.exports = (io) => {
     let cachedRawPlaylist = [];
@@ -54,7 +46,7 @@ module.exports = (io) => {
     subscriber.on(CURRENT_SONG, async (song) => {
         try {
             const songInfo = await frntDatabaseCommandsService.getSong(song);
-            const cover = await frntFileCommandService.getCoverForAlbum(song);
+            const cover = await frntFileCommandService.getCoverForAlbum(path.dirname(song));
 
             songInfo.cover = cover;
             await io.emit('action', {type: CURRENT_SONG_INFO_CLIENT, data: {...songInfo}});
@@ -89,11 +81,6 @@ module.exports = (io) => {
         const difference = playlist.filter(x => !b.has(x));
 
         const list = await frntDatabaseCommandsService.getPlaylist(difference);
-
-        for (let i = 0, j = list.length; i < j; i++) {
-            list[i].cover = await frntFileCommandService.getCoverForAlbum(list[i].filename);
-        }
-
         const cachedList = songsArrayToSongsObject(list);
 
         const result = playlist.map((item) => {
@@ -103,7 +90,14 @@ module.exports = (io) => {
 
         cachedRawPlaylist = playlist.slice(0);
         cachedFullPlaylist = songsArrayToSongsObject(result);
-        await io.emit('action', {type: CURRENT_PLAYLIST_CLIENT, data: result});
+
+        const groupedList = groupPlaylistByAlbum(result);
+
+        for (let i = 0, j = groupedList.length; i < j; i++) {
+            groupedList[i].cover = await frntFileCommandService.getCoverForAlbum(groupedList[i].album_path);
+        }
+
+        await io.emit('action', {type: CURRENT_PLAYLIST_CLIENT, data: groupedList});
     });
 
     /**

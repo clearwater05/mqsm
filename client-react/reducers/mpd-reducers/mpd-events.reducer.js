@@ -10,12 +10,12 @@ const initialState = {
 export default (state = initialState, action) => {
     switch (action.type) {
         case CURRENT_SONG_INFO_CLIENT:
-            console.log(action.data);
             return {
                 ...state,
                 currentSong: action.data
             };
         case CURRENT_PLAYLIST_CLIENT:
+            console.log(action.data);
             return {
                 ...state,
                 currentPlaylist: action.data
