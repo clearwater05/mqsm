@@ -1,16 +1,22 @@
-import React from 'react';
-import MQSMRating from '../../mqsm-common-components/mqsm-star-rating.component';
+import React, {Component} from 'react';
+import Song from '../../mqsm-song/mqsm-song.component';
+import {connect} from 'react-redux';
 
-export default (props) => {
-    return (
-        <div className="mqsm-current-song-info">
-            <div className="row">
-                <h6 className="mqsm-title-info col-10">{props.title}</h6>
-                <div className="col-2">
-                    <MQSMRating rating={props.rating}/>
-                </div>
+class CurrentSongInfo extends Component {
+    render() {
+        return (
+            <div className="mqsm-current-song-info">
+                <Song {...this.props.currentSong}/>
+                <div className="mqsm-artist-album-info">{this.props.currentSong.artist} - {this.props.currentSong.album}</div>
             </div>
-            <div className="mqsm-artist-album-info">{props.artist} - {props.album}</div>
-        </div>
-    );
-};
+        );
+    }
+}
+
+function mapStateToProps(state) {
+    return {
+        currentSong: state.mpdEvents.currentSong
+    };
+}
+
+export default connect(mapStateToProps, null)(CurrentSongInfo);

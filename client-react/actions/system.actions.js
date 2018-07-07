@@ -63,30 +63,3 @@ export function requestDirList(baseDir) {
         value: baseDir
     };
 }
-
-/**
- *
- * @return {{type: string}}
- */
-export function requestCurrentSong() {
-    return {
-        type: REQUEST_CURRENT_SONG
-    };
-}
-
-export function requestMPDStatus() {
-    return {
-        type: REQUEST_MPD_STATUS
-    };
-}
-
-/**
- *
- * @param {string} command
- * @return {{type: <string>}}
- */
-export function sendMPDPlayerCommand(command) {
-    return {
-        type: command
-    };
-}

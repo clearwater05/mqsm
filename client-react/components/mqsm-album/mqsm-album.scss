@@ -1,0 +1,15 @@
+.mqsm-album-main-wrapper {
+  margin: 12px 0 12px 12px;
+  .mqsm-album-main {
+    padding: 12px;
+  }
+  .mqsm-album-songs-wrapper {
+    background-color: $dark-gray2;
+    .mqsm-album-song {
+      padding: 12px;
+      &.mqsm-album-active-song {
+        background-color: $gray1;
+      }
+    }
+  }
+}

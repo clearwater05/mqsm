@@ -2,8 +2,9 @@ import {CURRENT_MPD_STATUS_CLIENT, CURRENT_PLAYLIST_CLIENT, CURRENT_SONG_INFO_CL
 
 const initialState = {
     currentSong: {},
-    currentPlaylist: {},
-    mpdStatus: {}
+    currentPlaylist: [],
+    mpdStatus: {},
+    currentSongIndex: 0
 };
 
 
@@ -15,16 +16,18 @@ export default (state = initialState, action) => {
                 currentSong: action.data
             };
         case CURRENT_PLAYLIST_CLIENT:
-            console.log(action.data);
             return {
                 ...state,
                 currentPlaylist: action.data
             };
-        case CURRENT_MPD_STATUS_CLIENT:
+        case CURRENT_MPD_STATUS_CLIENT: {
+            const currentSongIndex = action.data && action.data.song;
             return {
                 ...state,
+                currentSongIndex,
                 mpdStatus: action.data
             };
+        }
         default:
             return state;
     }

@@ -7,50 +7,39 @@ import {
     Alignment
 } from '@blueprintjs/core';
 
-import {requestCurrentSong, requestMPDStatus, sendMPDPlayerCommand} from '../../actions/system.actions';
+import {requestCurrentSong, requestMPDStatus } from '../../actions/current.actions';
 
-import AlbumCover from '../mqsm-common-components/mqsm-cover.component';
+import AlbumCover from '../mqsm-cover/mqsm-cover.component';
+import CurrentAlbumCoverWrapper from './components/mqsm-current-album-cover.component';
 import CurrentSongProgress from './components/mqsm-current-progress.component';
 import CurrentSongInfo from './components/mqsm-current-song-info.component';
 import MPDPlayControls from './components/mqsm-mpd-play-control-buttons';
 
-class TopPanelComponent extends PureComponent {
-    /**
-     *
-     * @return {number}
-     */
-    calculateProgress() {
-        return this.props.status.elapsed / this.props.status.duration || 0;
-    }
+const CurrentAlbumCover = CurrentAlbumCoverWrapper(AlbumCover);
 
+class TopPanelComponent extends PureComponent {
     /**
      *
      * @return {*}
      */
     render() {
-        const cover = this.props.currentSong.cover;
-        const albumName = this.props.currentSong.album;
-        const thumbWidth = 50;
-
         return (
-            <Navbar className="mqsm-navbar-container">
+            <Navbar className="mqsm-navbar-container row">
                 <NavbarGroup align={Alignment.LEFT}
-                             className="mqsm-top-navigation-group">
-                    <AlbumCover cover={cover} albumName={albumName} thumbWidth={thumbWidth}/>
+                             className="mqsm-top-navigation-group col-1">
+                    <CurrentAlbumCover />
                     <NavbarDivider />
                 </NavbarGroup>
-                <NavbarGroup className="mqsm-top-navigation-group">
+                <NavbarGroup className="mqsm-top-navigation-group col-9">
                     <div className="mqsm-status-wrapper">
-                        <CurrentSongInfo {...this.props.currentSong} />
-                        <CurrentSongProgress progress={this.calculateProgress()}/>
+                        <CurrentSongInfo />
+                        <CurrentSongProgress />
                     </div>
                 </NavbarGroup>
-                <NavbarGroup className="mqsm-top-navigation-group"
+                <NavbarGroup className="mqsm-top-navigation-group col-2"
                              align={Alignment.RIGHT}>
                     <div className="">
-                        <MPDPlayControls
-                            sendMPDPlayerCommand={this.props.sendMPDPlayerCommand}
-                            state={this.props.status.state}/>
+                        <MPDPlayControls />
                     </div>
                 </NavbarGroup>
             </Navbar>
@@ -66,15 +55,7 @@ class TopPanelComponent extends PureComponent {
     }
 }
 
-function mapStateToProps(state) {
-    return {
-        status: state.mpdEvents.mpdStatus,
-        currentSong: state.mpdEvents.currentSong
-    };
-}
-
-export default connect(mapStateToProps, {
+export default connect(null, {
     requestCurrentSong,
-    requestMPDStatus,
-    sendMPDPlayerCommand
+    requestMPDStatus
 })(TopPanelComponent);
