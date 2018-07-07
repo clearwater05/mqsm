@@ -17,7 +17,8 @@ const {
     REQUEST_PLAY,
     REQUEST_NEXT,
     REQUEST_PREVIOUS,
-    REQUEST_PAUSE
+    REQUEST_PAUSE,
+    REQUEST_CURRENT_PLAYLIST
 } = require('../../front.constants');
 
 
@@ -62,6 +63,9 @@ module.exports = (socket, next) => {
                 frntMpdService.requestCurrentSong();
                 break;
             }
+            case REQUEST_CURRENT_PLAYLIST:
+                frntMpdService.requestCurrentPlaylist();
+                break;
             case REQUEST_MPD_STATUS: {
                 const status = await frntMpdService.requestMPDStatus();
                 if (status) {

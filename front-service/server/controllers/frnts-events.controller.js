@@ -30,9 +30,6 @@ const {
 } = require('../libs/frnt-utils');
 
 module.exports = (io) => {
-    let cachedRawPlaylist = [];
-    let cachedFullPlaylist = {};
-
     /**
      *
      */
@@ -77,19 +74,13 @@ module.exports = (io) => {
      *
      */
     subscriber.on(CURRENT_PLAYLIST, async (playlist) => {
-        const b = new Set(cachedRawPlaylist);
-        const difference = playlist.filter(x => !b.has(x));
-
-        const list = await frntDatabaseCommandsService.getPlaylist(difference);
+        const list = await frntDatabaseCommandsService.getPlaylist(playlist);
         const cachedList = songsArrayToSongsObject(list);
 
         const result = playlist.map((item) => {
-            const obj = cachedList[item] || cachedFullPlaylist[item];
+            const obj = cachedList[item];
             return {...obj};
         });
-
-        cachedRawPlaylist = playlist.slice(0);
-        cachedFullPlaylist = songsArrayToSongsObject(result);
 
         const groupedList = groupPlaylistByAlbum(result);
 

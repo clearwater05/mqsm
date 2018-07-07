@@ -113,27 +113,26 @@ Song.getSongStatistics = async (song) => {
 
 /**
  *
- * @param {string} song
- * @return {Promise<void>}
+ * @param song
+ * @return {Promise<*>}
  */
 Song.updateSongStatistic = async (song) => {
     const savedStatistics = await Song.getSongStatistics(song);
-    savedStatistics.set({
-        lastplayed: new Date(),
-        fmps_playcount: +savedStatistics.get('fmps_playcount') + 1
-    });
-    await savedStatistics
-        .save(
+
+    savedStatistics.lastplayed = new Date();
+    savedStatistics.fmps_playcount = +savedStatistics.get('fmps_playcount') + 1;
+    try {
+        await savedStatistics.save(
             {
                 fields: ['lastplayed', 'fmps_playcount']
             }
-        )
-        .then(() => true)
-        .catch(() => {
-            const errMsg = `updateSongStatistic(${song}) failed (${scriptName}): `;
-            logger.errorLog(errMsg, e);
-            return null;
-        });
+        );
+        return true;
+    } catch (e) {
+        const errMsg = `updateSongStatistic(${song}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+        return null;
+    }
 };
 
 /**

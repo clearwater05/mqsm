@@ -19,6 +19,7 @@ function groupPlaylistByAlbum(playlist) {
     const grouped = [];
     if (Array.isArray(playlist)) {
         playlist.forEach((song, index) => {
+            song.index = index;
             if (index === 0 || (grouped[grouped.length - 1] && grouped[grouped.length - 1].album_path !== song.album_path)) {
                 const entry = {
                     album: song.album,
