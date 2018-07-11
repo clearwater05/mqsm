@@ -24,12 +24,14 @@ function groupPlaylistByAlbum(playlist) {
                 const entry = {
                     album: song.album,
                     album_path: song.album_path,
+                    duration: song.duration,
                     artist: song.artist,
                     date: song.date,
                     songs: [JSON.parse(JSON.stringify(song))]
                 };
                 grouped.push(entry);
             } else {
+                grouped[grouped.length - 1].duration += +song.duration;
                 grouped[grouped.length - 1].songs.push(JSON.parse(JSON.stringify(song)));
             }
         });

@@ -32,6 +32,29 @@ const {
 module.exports = (io) => {
     /**
      *
+     * @param list
+     * @return {Promise<Array|*>}
+     */
+    const createFullSongList = async (list) => {
+        const dbInfo = await frntDatabaseCommandsService.getPlaylist(list);
+        const cachedList = songsArrayToSongsObject(dbInfo);
+
+        const result = list.map((item) => {
+            const obj = cachedList[item];
+            return {...obj};
+        });
+
+        const groupedList = groupPlaylistByAlbum(result);
+
+        for (let i = 0, j = groupedList.length; i < j; i++) {
+            groupedList[i].cover = await frntFileCommandService.getCoverForAlbum(groupedList[i].album_path);
+        }
+
+        return groupedList;
+    };
+
+    /**
+     *
      */
     subscriber.on(CURRENT_MPD_STATUS, (status) => {
         io.emit('action', {type: CURRENT_MPD_STATUS_CLIENT, data: {...status}});
@@ -74,19 +97,7 @@ module.exports = (io) => {
      *
      */
     subscriber.on(CURRENT_PLAYLIST, async (playlist) => {
-        const list = await frntDatabaseCommandsService.getPlaylist(playlist);
-        const cachedList = songsArrayToSongsObject(list);
-
-        const result = playlist.map((item) => {
-            const obj = cachedList[item];
-            return {...obj};
-        });
-
-        const groupedList = groupPlaylistByAlbum(result);
-
-        for (let i = 0, j = groupedList.length; i < j; i++) {
-            groupedList[i].cover = await frntFileCommandService.getCoverForAlbum(groupedList[i].album_path);
-        }
+        const groupedList = await createFullSongList(playlist);
 
         await io.emit('action', {type: CURRENT_PLAYLIST_CLIENT, data: groupedList});
     });
