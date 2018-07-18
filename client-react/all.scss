@@ -27,6 +27,9 @@
 /**/
 @import "./components/current-playlist/mqsm-current-playlist.scss";
 
+/* manage playlists **/
+@import "./components/manage-playlists/mqsm-manage-playlists.scss";
+
 /* system settings*/
 @import "./components/system/mpsm-system-settings";
 @import "./components/system/database-maintenance/mqsm-database-maintenance.scss";

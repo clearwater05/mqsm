@@ -4,6 +4,7 @@ const path = require('path');
 const dbCommandResponder = require('../services/database-command-responder.service');
 const dbEventPublisher = require('../services/database-events-publisher.service');
 const songModel = require('../models/song.model');
+const playlistModel = require('../models/playlist.model');
 const logger = require('../services/database-logger.service');
 
 const scriptName = path.basename(__filename);
@@ -16,7 +17,8 @@ const {
     CURRENT_PLAYLIST_COMMAND,
     REQUEST_SONG_INFO,
     CLEANUP_DATABASE_COMMAND,
-    UPDATE_SONG_RATING_COMMAND
+    UPDATE_SONG_RATING_COMMAND,
+    REQUEST_SAVED_PLAYLISTS
 } = require('../database-service.constants');
 
 module.exports = () => {
@@ -70,7 +72,7 @@ module.exports = () => {
      *
      */
     dbCommandResponder.on(CURRENT_PLAYLIST_COMMAND, async (req, cb) => {
-        const list = await songModel.getPlaylist(req.value);
+        const list = await songModel.getSonglist(req.value);
         cb(list);
     });
 
@@ -88,5 +90,17 @@ module.exports = () => {
         if (Array.isArray(result) && result[0] === 1) {
             cb(result);
         }
+    });
+
+    dbCommandResponder.on(REQUEST_SAVED_PLAYLISTS, async (req, cb) => {
+        const result = req.value ?
+            await playlistModel.getPlaylist(req.value) :
+            await playlistModel.getAllPlaylists();
+
+        if (result) {
+            cb(result);
+            return;
+        }
+        cb(null);
     });
 };

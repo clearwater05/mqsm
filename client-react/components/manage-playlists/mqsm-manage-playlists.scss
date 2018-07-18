@@ -1,0 +1,27 @@
+.mqsm-manage-playlists {
+  .mqsm-plalists-table {
+    .msqm-playlist-rule {
+      margin: 0 12px 0 0;
+      span {
+        margin: 0 12px;
+        .msqm-playlist-rule-field {
+
+        }
+        .msqm-playlist-rule-condition {
+          font-weight: bold;
+        }
+        .msqm-playlist-rule-value {
+
+        }
+      }
+    }
+    .mqsm_is_active_playlist {
+      &.active {
+        color: $green3;
+      }
+      &.inactive {
+        color: $gray3;
+      }
+    }
+  }
+}

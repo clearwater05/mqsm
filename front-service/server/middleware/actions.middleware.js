@@ -2,6 +2,7 @@ const frntCommandsController = require('../controllers/frnt-commands.controller'
 const frntPublisher = require('../services/frnt-service-publisher.service');
 const frntFileCommandService = require('../services/frnt-file-commands.service');
 const frntMpdService = require('../services/frnt-mpd-commands.service');
+const frntDatabaseService = require('../services/frnt-database-commands.service');
 
 const {
     UPDATE_DATABASE,
@@ -18,7 +19,9 @@ const {
     REQUEST_NEXT,
     REQUEST_PREVIOUS,
     REQUEST_PAUSE,
-    REQUEST_CURRENT_PLAYLIST
+    REQUEST_CURRENT_PLAYLIST,
+    REQUEST_SAVED_PLAYLISTS,
+    SAVED_PLAYLISTS_CLIENT
 } = require('../../front.constants');
 
 
@@ -80,6 +83,13 @@ module.exports = (socket, next) => {
             case REQUEST_PAUSE:
                 frntMpdService.sendMPDCommand(data.type);
                 break;
+            case REQUEST_SAVED_PLAYLISTS:{
+                const playlists = await frntDatabaseService.requestSavedPlaylist(data.value);
+                if (playlists) {
+                    socket.emit('action', {type: SAVED_PLAYLISTS_CLIENT, data: playlists});
+                }
+                break;
+            }
             default: {
                 frntPublisher.publishEvents(data.type);
                 break;

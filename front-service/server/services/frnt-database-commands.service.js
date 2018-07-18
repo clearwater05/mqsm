@@ -5,7 +5,8 @@ const {
     CURRENT_PLAYLIST_COMMAND,
     REQUEST_SONG_INFO,
     CLEANUP_DATABASE_COMMAND,
-    UPDATE_SONG_RATING_COMMAND
+    UPDATE_SONG_RATING_COMMAND,
+    REQUEST_SAVED_PLAYLISTS
 } = require('../../front.constants');
 
 const dbRequester = new cote.Requester({
@@ -123,6 +124,24 @@ module.exports = {
 
             dbRequester.send(req, (result) => {
                 resolve(result);
+            });
+        });
+    },
+
+    /**
+     *
+     */
+    requestSavedPlaylist(playlistName) {
+        return new Promise((resolve) => {
+            const req = {
+                type: REQUEST_SAVED_PLAYLISTS
+            };
+            if (playlistName) {
+                req.value = playlistName;
+            }
+
+            dbRequester.send(req, (res) => {
+                resolve(res);
             });
         });
     }

@@ -137,20 +137,20 @@ Song.updateSongStatistic = async (song) => {
 
 /**
  *
- * @param {string[]} rawList
+ * @param {string[]} list
  * @return {Promise<Array<Model>>}
  */
-Song.getPlaylist = async (rawList) => {
+Song.getSonglist = async (list) => {
     try {
         return await Song.findAll({
             where: {
                 filename: {
-                    [Op.in]: rawList
+                    [Op.in]: list
                 }
             }
         });
     } catch (e) {
-        const errMsg = `getPlaylist() failed (${scriptName}): `;
+        const errMsg = `getSonglist() failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
     }
 };
