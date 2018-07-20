@@ -21,7 +21,9 @@ const {
     REQUEST_PAUSE,
     REQUEST_CURRENT_PLAYLIST,
     REQUEST_SAVED_PLAYLISTS,
-    SAVED_PLAYLISTS_CLIENT
+    SAVED_PLAYLISTS_CLIENT,
+    REQUEST_SELECTED_SONG_DETAILS,
+    SONG_DETAILS_CLIENT
 } = require('../../front.constants');
 
 
@@ -62,6 +64,13 @@ module.exports = (socket, next) => {
             case CLEANUP_DATABASE:
                 frntCommandsController.databaseCleanup();
                 break;
+            case REQUEST_SELECTED_SONG_DETAILS: {
+                if (data.value) {
+                    const songDetails = await frntDatabaseService.getSong(data.value);
+                    socket.emit('action', {type: SONG_DETAILS_CLIENT, data: {...songDetails}});
+                }
+                break;
+            }
             case REQUEST_CURRENT_SONG: {
                 frntMpdService.requestCurrentSong();
                 break;

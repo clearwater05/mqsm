@@ -5,8 +5,6 @@ import MQSMRating from '../mqsm-common-components/mqsm-star-rating.component';
 import OverlayHOComponent from '../mqsm-common-components/mqsm-overlay.component';
 import SongDetails from './mqsm-song-details.component';
 
-const DetailsOverlay = OverlayHOComponent(SongDetails);
-
 class SongComponent extends Component {
     /**
      *
@@ -39,8 +37,10 @@ class SongComponent extends Component {
         const overlayProps = {
             showOverlay: this.state.showDetails,
             toggleOverlay: this.toggleSongDetails,
-            ...this.props
+            filename: this.props.filename
         };
+
+        const DetailsOverlay = OverlayHOComponent(SongDetails);
 
         return (
             <Fragment>

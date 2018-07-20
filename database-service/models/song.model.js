@@ -143,6 +143,7 @@ Song.updateSongStatistic = async (song) => {
 Song.getSonglist = async (list) => {
     try {
         return await Song.findAll({
+            attributes: ['filename', 'track', 'title', 'rating', 'album', 'artist', 'duration', 'album_path', 'date'],
             where: {
                 filename: {
                     [Op.in]: list

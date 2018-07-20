@@ -1,9 +1,9 @@
 import classNames from 'classnames';
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 import {Overlay, Classes} from '@blueprintjs/core';
 
 export default (OverlayContent) => {
-    return class MQSMOverlay extends Component {
+    return class MQSMOverlay extends PureComponent {
         /**
          *
          * @param props

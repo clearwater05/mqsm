@@ -9,6 +9,10 @@ const mpdClient = mpdClientService.getMpdClient();
  *
  */
 module.exports = () => {
+    const publishCurrentPlaylist = async () => {
+        const list = await mpdClientService.getCurrentPlaylist();
+        await eventsPublisher.publishCurrentPlaylist(list);
+    };
     /**
      *
      */
@@ -38,6 +42,7 @@ module.exports = () => {
         if (currentSongStateChanged && song) {
             mpdState.toggleStatisticsLock(false);
             await eventsPublisher.publishCurrentSong(song);
+            publishCurrentPlaylist();
         }
 
         if (status) {
@@ -63,8 +68,7 @@ module.exports = () => {
      *
      */
     mpdClient.on('system-playlist', async () => {
-        const list = await mpdClientService.getCurrentPlaylist();
-        await eventsPublisher.publishCurrentPlaylist(list);
+        await publishCurrentPlaylist();
     });
 
     /**

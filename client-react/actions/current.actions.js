@@ -1,7 +1,8 @@
 import {
     REQUEST_CURRENT_PLAYLIST,
     REQUEST_CURRENT_SONG,
-    REQUEST_MPD_STATUS
+    REQUEST_MPD_STATUS,
+    REQUEST_SELECTED_SONG_DETAILS
 } from '../front.constants';
 
 /**
@@ -42,5 +43,17 @@ export function requestMPDStatus() {
 export function requestCurrentPlaylist() {
     return {
         type: REQUEST_CURRENT_PLAYLIST
+    };
+}
+
+/**
+ *
+ * @param song
+ * @return {{type: string, value: string}}
+ */
+export function requestSelectedSongDetails(song) {
+    return {
+        type: REQUEST_SELECTED_SONG_DETAILS,
+        value: song
     };
 }

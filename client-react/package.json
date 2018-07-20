@@ -18,6 +18,7 @@
     "co": "^4.6.0",
     "css-star-rating": "^1.2.4",
     "font-awesome": "^4.7.0",
+    "immutable": "^3.8.2",
     "lodash": "^4.17.10",
     "moment": "^2.22.2",
     "react": "^16.3.2",
@@ -27,6 +28,7 @@
     "react-router-dom": "^4.3.1",
     "react-transition-group": "^2.3.1",
     "redux": "^4.0.0",
+    "redux-immutable": "^4.0.0",
     "redux-socket.io": "^1.4.0",
     "socket.io": "^2.1.0",
     "socket.io-client": "^2.1.0"
