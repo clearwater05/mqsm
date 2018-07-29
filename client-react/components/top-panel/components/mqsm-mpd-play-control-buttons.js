@@ -25,7 +25,7 @@ class MPDPlayControls extends PureComponent {
             <ButtonGroup minimal={false} large={true}>
                 <Button icon="step-backward" intent={Intent.PRIMARY}
                         onClick={() => {
-                            this.props.status.sendMPDPlayerCommand(REQUEST_PREVIOUS);
+                            this.props.sendMPDPlayerCommand(REQUEST_PREVIOUS);
                         }}
                         disabled={state === 'pause' || state === 'stop'}/>
                 <Button icon={state === 'stop' ? 'play' : 'stop'}
