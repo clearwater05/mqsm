@@ -1,3 +1,6 @@
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+
 /**
  * @typedef {Object} SongModel
  * @property filename
@@ -87,23 +90,37 @@ const songTags = [
     'ctime',
     'filesize'
 ];
+const defToOp = {
+    eq: null
+};
+
+/**
+ *
+ * @param {Array} defs
+ */
+function mapDefsToQuery(defs) {
+    const propName = defs[0];
+    const operator = defToOp[defs[1]] || defs[1];
+    const defValue = defs[2];
+
+}
 
 module.exports = {
     /**
      *
      * @param {Object} rawData
-     * @return {Song}
+     * @return {SongModel}
      */
     mapMetaTagsToProps(rawData) {
         /**
          *
          * @type {SongModel}
          */
-        const data = {};
+        const song = {};
 
         songTags.forEach((tag) => {
             if (rawData.hasOwnProperty(tag)) {
-                data[tag] = rawData[tag];
+                song[tag] = rawData[tag];
                 delete rawData[tag];
             }
         });
@@ -112,29 +129,37 @@ module.exports = {
         tags.forEach((tag) => {
             switch (tag) {
                 case 'codec_name':
-                    data.filetype = rawData['codec_name'];
+                    song.filetype = rawData['codec_name'];
                     delete rawData['codec_name'];
                     break;
                 case 'bits_per_raw_sample':
-                    data.bitrate = +rawData['bits_per_raw_sample'];
+                    song.bitrate = +rawData['bits_per_raw_sample'];
                     delete rawData['bits_per_raw_sample'];
                     break;
                 case 'bit_rate':
-                    data.bitrate = +rawData['bit_rate'];
+                    song.bitrate = +rawData['bit_rate'];
                     delete rawData['bit_rate'];
                     break;
                 case 'album_artist':
-                    data.albumartist = rawData.album_artist;
+                    song.albumartist = rawData.album_artist;
                     delete rawData.album_artist;
                     break;
                 case 'totaltracks':
-                    data.tracktotal = rawData.totaltracks;
+                    song.tracktotal = rawData.totaltracks;
                     delete rawData.totaltracks;
                     break;
             }
         });
 
-        data.other_tags = {...rawData};
-        return data;
+        song.other_tags = {...rawData};
+        return song;
+    },
+
+    /**
+     *
+     * @param {Object} definition
+     */
+    mapPlaylistDefinitionToQuery(definition) {
+        console.log(definition);
     }
 };

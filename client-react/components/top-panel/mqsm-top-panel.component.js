@@ -24,7 +24,7 @@ class TopPanelComponent extends PureComponent {
      */
     render() {
         return (
-            <Navbar className="mqsm-navbar-container row">
+            <Navbar className="mqsm-navbar-container bp3-dark row">
                 <NavbarGroup align={Alignment.LEFT}
                              className="mqsm-top-navigation-group col-1">
                     <CurrentAlbumCover />

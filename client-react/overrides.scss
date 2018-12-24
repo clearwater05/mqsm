@@ -1,0 +1,14 @@
+.bp3-portal {
+  .bp3-overlay {
+    &.bp3-overlay-open {
+      .bp3-popover {
+        &.bp3-select-popover {
+          .bp3-menu {
+            height: 300px;
+            overflow-y: auto;
+          }
+        }
+      }
+    }
+  }
+}

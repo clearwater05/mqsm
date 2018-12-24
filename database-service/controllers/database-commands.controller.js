@@ -6,6 +6,7 @@ const dbEventPublisher = require('../services/database-events-publisher.service'
 const songModel = require('../models/song.model');
 const playlistModel = require('../models/playlist.model');
 const logger = require('../services/database-logger.service');
+const {mapPlaylistDefinitionToQuery} = require('../libs/utils');
 
 const scriptName = path.basename(__filename);
 
@@ -18,7 +19,9 @@ const {
     REQUEST_SONG_INFO,
     CLEANUP_DATABASE_COMMAND,
     UPDATE_SONG_RATING_COMMAND,
-    REQUEST_SAVED_PLAYLISTS
+    REQUEST_SAVED_PLAYLISTS,
+    REQUEST_SAVED_PLAYLIST_PREVIEW,
+    REQUEST_SONG_ATTRIBUTES_LIST
 } = require('../database-service.constants');
 
 module.exports = () => {
@@ -85,6 +88,9 @@ module.exports = () => {
         cb(result);
     });
 
+    /**
+     *
+     */
     dbCommandResponder.on(UPDATE_SONG_RATING_COMMAND, async (req, cb) => {
         const result = await songModel.setRating(req.value.song, req.value.rating);
         if (Array.isArray(result) && result[0] === 1) {
@@ -92,6 +98,9 @@ module.exports = () => {
         }
     });
 
+    /**
+     *
+     */
     dbCommandResponder.on(REQUEST_SAVED_PLAYLISTS, async (req, cb) => {
         const result = req.value ?
             await playlistModel.getPlaylist(req.value) :
@@ -102,5 +111,23 @@ module.exports = () => {
             return;
         }
         cb(null);
+    });
+
+    /**
+     *
+     */
+    dbCommandResponder.on(REQUEST_SAVED_PLAYLIST_PREVIEW, async (req, cb) => {
+        const rawDefinition = await playlistModel.getPlaylistDefinition(req.value);
+        const query = mapPlaylistDefinitionToQuery(rawDefinition);
+
+        cb(true);
+    });
+
+    /**
+     *
+     */
+    dbCommandResponder.on(REQUEST_SONG_ATTRIBUTES_LIST, async (req, cb) => {
+        const attributesList = await songModel.getAttributes();
+        cb(attributesList);
     });
 };

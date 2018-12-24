@@ -23,7 +23,10 @@ const {
     REQUEST_SAVED_PLAYLISTS,
     SAVED_PLAYLISTS_CLIENT,
     REQUEST_SELECTED_SONG_DETAILS,
-    SONG_DETAILS_CLIENT
+    SONG_DETAILS_CLIENT,
+    REQUEST_SAVED_PLAYLIST_PREVIEW,
+    REQUEST_SONG_ATTRIBUTES_LIST,
+    SONG_ATTRIBUTES_LIST
 } = require('../../front.constants');
 
 
@@ -99,6 +102,15 @@ module.exports = (socket, next) => {
                 }
                 break;
             }
+            case REQUEST_SAVED_PLAYLIST_PREVIEW:
+                const playlistData = await frntDatabaseService.requestSavedPlaylistPreview(data.value);
+                break;
+            case REQUEST_SONG_ATTRIBUTES_LIST:
+                const attributesList = await frntDatabaseService.requestSongAttributesList();
+                if (attributesList) {
+                    socket.emit('action', {type: SONG_ATTRIBUTES_LIST, data: attributesList});
+                }
+                break;
             default: {
                 frntPublisher.publishEvents(data.type);
                 break;

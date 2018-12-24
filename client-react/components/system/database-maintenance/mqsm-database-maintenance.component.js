@@ -31,7 +31,7 @@ class MQSMDatabaseMaintenance extends Component {
             showDirList: false
         };
 
-        this.mainClass = 'mqsm-database-maintenance-component';
+        this.mainClass = 'bp3-dark mqsm-database-maintenance-component';
         this.sectionClass = 'mqsm-database-maintenance-section';
         this.requestDirList = _.debounce(this.props.requestDirList, 500);
 

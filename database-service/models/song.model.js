@@ -6,7 +6,6 @@ const sequelize = require('../services/sequelize.service');
 const logger = require('../services/database-logger.service');
 
 const scriptName = path.basename(__filename);
-const Op = Sequelize.Op;
 
 const Song = sequelize.define('song', {
     filename: {type: Sequelize.STRING, allowNull: false, primaryKey: true},
@@ -146,7 +145,7 @@ Song.getSonglist = async (list) => {
             attributes: ['filename', 'track', 'title', 'rating', 'album', 'artist', 'duration', 'album_path', 'date'],
             where: {
                 filename: {
-                    [Op.in]: list
+                    $in: list
                 }
             }
         });
@@ -166,7 +165,7 @@ Song.cleanUpSongTable = async (fullSongList) => {
         const cleaned = await Song.destroy({
             where: {
                 filename: {
-                    [Op.notIn]: fullSongList
+                    $notIn: fullSongList
                 }
             }
         });
@@ -197,6 +196,20 @@ Song.setRating = async (song, rating) => {
         });
     } catch (e) {
         const errMsg = `setRating(${song}, ${rating}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+        return null;
+    }
+};
+
+/**
+ *
+ * @returns {Promise<null>}
+ */
+Song.getAttributes = async () => {
+    try {
+        return await Song.describe();
+    } catch (e) {
+        const errMsg = `getAttributes() failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
         return null;
     }

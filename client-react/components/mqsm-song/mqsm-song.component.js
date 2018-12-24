@@ -2,7 +2,7 @@ import React, {Fragment, Component} from 'react';
 import {fmtTime} from '../../libs/mqsm-client-utils';
 import MQSMRating from '../mqsm-common-components/mqsm-star-rating.component';
 
-import OverlayHOComponent from '../mqsm-common-components/mqsm-overlay.component';
+import MQSMOverlay from '../mqsm-common-components/mqsm-overlay.component';
 import SongDetails from './mqsm-song-details.component';
 
 class SongComponent extends Component {
@@ -23,8 +23,10 @@ class SongComponent extends Component {
      *
      */
     toggleSongDetails() {
-        this.setState({
-            showDetails: !this.state.showDetails
+        this.setState((prevState) => {
+            return {
+                showDetails: !prevState.showDetails
+            };
         });
     }
 
@@ -40,7 +42,7 @@ class SongComponent extends Component {
             filename: this.props.filename
         };
 
-        const DetailsOverlay = OverlayHOComponent(SongDetails);
+        const DetailsOverlay = MQSMOverlay(SongDetails);
 
         return (
             <Fragment>

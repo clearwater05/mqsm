@@ -31,7 +31,7 @@ export default (props) => {
     });
 
     return (
-        <div className="pt-dark mqsm-album-main-wrapper">
+        <div className="bp3-dark mqsm-album-main-wrapper">
             <div className="mqsm-album-main row">
                 <div className="col-1 mqsm-album-cover">
                     <MQSMCover cover={cover} albumName={albumName} thumbWidth={thumbWidth}/>

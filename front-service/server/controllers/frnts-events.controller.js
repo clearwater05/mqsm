@@ -46,8 +46,13 @@ module.exports = (io) => {
 
         const groupedList = groupPlaylistByAlbum(result);
 
-        for (let i = 0, j = groupedList.length; i < j; i++) {
-            groupedList[i].cover = await frntFileCommandService.getCoverForAlbum(groupedList[i].album_path);
+        try {
+            for (let i = 0, j = groupedList.length; i < j; i++) {
+                groupedList[i].cover = await frntFileCommandService.getCoverForAlbum(groupedList[i].album_path);
+            }
+        } catch (e) {
+            logger.errorLog('get cover error: ', e, new Date());
+            await io.emit('action', {type: SYSTEM_ERROR_CLIENT, data: e});
         }
 
         return groupedList;

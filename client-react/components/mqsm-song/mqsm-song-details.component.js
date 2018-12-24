@@ -129,7 +129,7 @@ class SongDetails extends Component {
      * @param nextProps
      * @return {boolean}
      */
-    shouldComponentUpdate(nextProps, nextState) {
+    shouldComponentUpdate(nextProps) {
         return this.props.song && this.props.song.filename !== nextProps.filename;
     }
 }

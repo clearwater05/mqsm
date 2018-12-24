@@ -36,23 +36,37 @@ Playlist.getAllPlaylists = async () => {
 
 /**
  *
- * @param playlistName
+ * @param name
  * @return {Promise<Model>}
  */
-Playlist.getPlaylist = async (playlistName) => {
+Playlist.getPlaylist = async (name) => {
     try {
         return await Playlist.findOne({
             where: {
-                name: {
-                    [Op.in]: playlistName
-                }
+                name
             }
         });
     } catch (e) {
-        const errMsg = `getPlaylist() failed (${scriptName}): `;
+        const errMsg = `getPlaylist(${name}) failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
     }
 };
+
+Playlist.getPlaylistDefinition = async (name) => {
+    try {
+        return await Playlist.findOne({
+            attributes: ['definition'],
+            where: {
+                name
+            }
+        }).then((found) => {
+            return found.toJSON();
+        });
+    } catch (e) {
+        const errMsg = `getPlaylistDefinition(${name}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+    }
+}
 
 
 Playlist.sync();

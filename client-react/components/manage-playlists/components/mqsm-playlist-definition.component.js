@@ -2,7 +2,7 @@ import React from 'react';
 import {Intent} from '@blueprintjs/core';
 
 import RulePresentation from './mqsm-playlist-rules-presentation.component';
-import RuleLimit from './mqsm-playlist-rule-limit.component';
+import RuleLimit from './mqsm-playlist-rule-limit-display.component';
 
 export default (props) => {
     if (props.rules) {
