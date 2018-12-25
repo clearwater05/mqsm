@@ -4,8 +4,7 @@ import {
     UPDATE_DATABASE_DIR_NAME,
     CLEANUP_DATABASE,
     REQUEST_DIR_LIST,
-    REQUEST_CURRENT_SONG,
-    REQUEST_MPD_STATUS
+    DUMP_DATABASE_COMMAND
 } from '../front.constants';
 
 /**
@@ -61,5 +60,15 @@ export function requestDirList(baseDir) {
     return {
         type: REQUEST_DIR_LIST,
         value: baseDir
+    };
+}
+
+/**
+ *
+ * @returns {{type: string}}
+ */
+export function dumpStatistics() {
+    return {
+        type: DUMP_DATABASE_COMMAND
     };
 }

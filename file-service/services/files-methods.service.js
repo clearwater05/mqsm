@@ -7,7 +7,7 @@ const ffprobe = require('ffprobe');
 const ffprobeStatic = require('ffprobe-static');
 
 const logger = require('./fs-logger.service');
-const { prepareMetaDataTags } = require('../libs/utils');
+const {prepareMetaDataTags} = require('../libs/utils');
 
 const promisedTimeout = util.promisify(setTimeout);
 const scriptName = path.basename(__filename);
@@ -229,14 +229,14 @@ module.exports = {
             } catch (e) {
                 details = {};
             }
-            
+
             try {
                 stat = await this.getSongSavedStatistics(file);
             } catch (e) {
-                stat = { lastPlayed: '1970-01-01T00:00:00.000Z' };
+                stat = {lastPlayed: '1970-01-01T00:00:00.000Z'};
             }
 
-            return { ...meta, ...prob, ...details, ...stat };
+            return {...meta, ...prob, ...details, ...stat};
         }));
     },
 
@@ -255,6 +255,57 @@ module.exports = {
         }
 
         return result;
+    },
+
+    /**
+     *
+     * @param statData
+     * @param file
+     * @returns {Promise}
+     */
+    async saveStatisticsToFile(statData, file) {
+        return new Promise((resolve, reject) => {
+            try {
+                const fullPath = this.getFullPath(file);
+                const pathObj = path.parse(fullPath);
+                const statFile = path.join(pathObj.dir, `${pathObj.name}.json`);
+                const statString = JSON.stringify(statData);
+
+                fs.writeFile(statFile, statString, (err) => {
+                    if (err) {
+                        logger.errorLog(`Can't save statistics file ${statFile} (${scriptName}): `, err);
+                        reject(err);
+                        return;
+                    }
+
+                    resolve();
+                });
+            } catch (e) {
+                logger.errorLog(`Can't save statistics for ${file} (${scriptName}): `, e);
+                reject(e);
+            }
+        });
+    },
+
+    /**
+     *
+     * @param statistics
+     * @returns {Promise<boolean>}
+     */
+    async dumpStatistics(statistics) {
+        try {
+            if (Array.isArray(statistics)) {
+                for (let i = 0, j = statistics.length; i < j; i++) {
+                    const {filename, ...st } = statistics[i];
+
+                    await this.saveStatisticsToFile(st, filename);
+                    await promisedTimeout(5);
+                }
+                return statistics.length;
+            }
+        } catch (e) {
+            logger.errorLog(`Can't save statistics (${scriptName}): `, e);
+        }
     },
 
     /************************* Other requests *****************************/

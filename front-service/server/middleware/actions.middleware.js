@@ -26,7 +26,8 @@ const {
     SONG_DETAILS_CLIENT,
     REQUEST_SAVED_PLAYLIST_PREVIEW,
     REQUEST_SONG_ATTRIBUTES_LIST,
-    SONG_ATTRIBUTES_LIST
+    SONG_ATTRIBUTES_LIST,
+    DUMP_DATABASE_COMMAND
 } = require('../../front.constants');
 
 
@@ -110,6 +111,9 @@ module.exports = (socket, next) => {
                 if (attributesList) {
                     socket.emit('action', {type: SONG_ATTRIBUTES_LIST, data: attributesList});
                 }
+                break;
+            case DUMP_DATABASE_COMMAND:
+                await frntCommandsController.dumpStatistics();
                 break;
             default: {
                 frntPublisher.publishEvents(data.type);

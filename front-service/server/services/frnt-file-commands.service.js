@@ -4,7 +4,8 @@ const {
     REQUEST_COVER,
     REQUEST_FILE_METADATA,
     REQUEST_FILES_LIST_METADATA,
-    REQUEST_DIR_LIST
+    REQUEST_DIR_LIST,
+    DUMP_STATISTICS_TO_FILES
 } = require('../../front.constants');
 
 const fsRequester = new cote.Requester({
@@ -91,6 +92,24 @@ module.exports = {
             };
 
             fsRequester.send(req, (res) => {
+                resolve(res);
+            });
+        });
+    },
+
+    /**
+     *
+     * @param {Array} statistics
+     * @returns {Promise<any>}
+     */
+    dumpStatistics(statistics) {
+        return new Promise(resolve => {
+            const req = {
+                type: DUMP_STATISTICS_TO_FILES,
+                value: statistics
+            };
+
+            fsRequester.send(req, res => {
                 resolve(res);
             });
         });

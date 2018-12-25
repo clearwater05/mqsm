@@ -5,7 +5,8 @@ const {
     REQUEST_COVER,
     REQUEST_FILE_METADATA,
     REQUEST_FILES_LIST_METADATA,
-    REQUEST_DIR_LIST
+    REQUEST_DIR_LIST,
+    DUMP_STATISTICS_TO_FILES
 } = require('../file-service.constants');
 
 module.exports = () => {
@@ -49,5 +50,17 @@ module.exports = () => {
         const dirList = await fileMethods.getDirList(req.value);
 
         cb(dirList);
+    });
+
+    /**
+     *
+     */
+    responder.on(DUMP_STATISTICS_TO_FILES, async (req, cb) => {
+        try {
+            const result = await fileMethods.dumpStatistics(req.value);
+            cb(result);
+        } catch (e) {
+            cb(0);
+        }
     });
 };

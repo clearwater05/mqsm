@@ -215,6 +215,27 @@ Song.getAttributes = async () => {
     }
 };
 
+/**
+ *
+ * @param {Array} list
+ * @returns {Promise<*>}
+ */
+Song.getStatistics = async list => {
+    try {
+        return await Song.findAll({
+            attributes: ['filename', 'lastplayed', 'rating', 'fmps_playcount', 'fmps_rating'],
+            where: {
+                filename: {
+                    $in: list
+                }
+            }
+        });
+    } catch (e) {
+        const errMsg = `getStatistics() failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+    }
+};
+
 Song.sync();
 
 module.exports = Song;

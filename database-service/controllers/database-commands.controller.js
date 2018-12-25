@@ -21,7 +21,8 @@ const {
     UPDATE_SONG_RATING_COMMAND,
     REQUEST_SAVED_PLAYLISTS,
     REQUEST_SAVED_PLAYLIST_PREVIEW,
-    REQUEST_SONG_ATTRIBUTES_LIST
+    REQUEST_SONG_ATTRIBUTES_LIST,
+    REQUEST_LIST_STATISTICS
 } = require('../database-service.constants');
 
 module.exports = () => {
@@ -129,5 +130,10 @@ module.exports = () => {
     dbCommandResponder.on(REQUEST_SONG_ATTRIBUTES_LIST, async (req, cb) => {
         const attributesList = await songModel.getAttributes();
         cb(attributesList);
+    });
+
+    dbCommandResponder.on(REQUEST_LIST_STATISTICS, async (req, cb) => {
+        const statistics = await songModel.getStatistics(req.value);
+        cb(statistics);
     });
 };

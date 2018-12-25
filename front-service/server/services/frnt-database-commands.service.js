@@ -8,7 +8,8 @@ const {
     UPDATE_SONG_RATING_COMMAND,
     REQUEST_SAVED_PLAYLISTS,
     REQUEST_SAVED_PLAYLIST_PREVIEW,
-    REQUEST_SONG_ATTRIBUTES_LIST
+    REQUEST_SONG_ATTRIBUTES_LIST,
+    REQUEST_LIST_STATISTICS
 } = require('../../front.constants');
 
 const dbRequester = new cote.Requester({
@@ -179,6 +180,24 @@ module.exports = {
             };
 
             dbRequester.send(req, (res) => {
+                resolve(res);
+            });
+        });
+    },
+
+    /**
+     *
+     * @param {array} list
+     * @returns {Promise<Array>}
+     */
+    requestListStatistics(list) {
+        return new Promise(resolve => {
+            const req = {
+                type: REQUEST_LIST_STATISTICS,
+                value: list
+            };
+
+            dbRequester.send(req, res => {
                 resolve(res);
             });
         });
