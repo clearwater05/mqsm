@@ -46,6 +46,14 @@ const Op = Sequelize.Op;
  */
 
 /**
+ * @typedef {Object} StickersModel
+ * @property {String} type
+ * @property {String} uri
+ * @property {String} name
+ * @property {String} value
+ */
+
+/**
  *
  * @type {string[]}
  */
@@ -90,70 +98,97 @@ const songTags = [
     'ctime',
     'filesize'
 ];
-const defToOp = {
-    eq: null
+
+const operatorsAliases = {
+    $eq: Op.eq,
+    $ne: Op.ne,
+    $gte: Op.gte,
+    $gt: Op.gt,
+    $lte: Op.lte,
+    $lt: Op.lt,
+    $not: Op.not,
+    $in: Op.in,
+    $notIn: Op.notIn,
+    $is: Op.is,
+    $like: Op.like,
+    $notLike: Op.notLike,
+    $iLike: Op.iLike,
+    $notILike: Op.notILike,
+    $regexp: Op.regexp,
+    $notRegexp: Op.notRegexp,
+    $iRegexp: Op.iRegexp,
+    $notIRegexp: Op.notIRegexp,
+    $between: Op.between,
+    $notBetween: Op.notBetween,
+    $overlap: Op.overlap,
+    $contains: Op.contains,
+    $contained: Op.contained,
+    $adjacent: Op.adjacent,
+    $strictLeft: Op.strictLeft,
+    $strictRight: Op.strictRight,
+    $noExtendRight: Op.noExtendRight,
+    $noExtendLeft: Op.noExtendLeft,
+    $and: Op.and,
+    $or: Op.or,
+    $any: Op.any,
+    $all: Op.all,
+    $values: Op.values,
+    $col: Op.col
 };
 
 /**
  *
- * @param {Array} defs
+ * @param {Object} rawData
+ * @return {SongModel}
  */
-function mapDefsToQuery(defs) {
-    const propName = defs[0];
-    const operator = defToOp[defs[1]] || defs[1];
-    const defValue = defs[2];
+function mapMetaTagsToProps(rawData) {
+    const rawCopy = {...rawData};
+    /**
+     *
+     * @type {SongModel}
+     */
+    const song = {};
 
+    songTags.forEach((tag) => {
+        if (rawCopy.hasOwnProperty(tag)) {
+            song[tag] = rawCopy[tag];
+            delete rawCopy[tag];
+        }
+    });
+
+    const tags = Object.keys(rawCopy);
+    tags.forEach((tag) => {
+        switch (tag) {
+            case 'codec_name':
+                song.filetype = rawCopy['codec_name'];
+                delete rawCopy['codec_name'];
+                break;
+            case 'bits_per_raw_sample':
+                song.bitrate = +rawCopy['bits_per_raw_sample'];
+                delete rawCopy['bits_per_raw_sample'];
+                break;
+            case 'bit_rate':
+                song.bitrate = +rawCopy['bit_rate'];
+                delete rawCopy['bit_rate'];
+                break;
+            case 'album_artist':
+                song.albumartist = rawCopy.album_artist;
+                delete rawCopy.album_artist;
+                break;
+            case 'totaltracks':
+                song.tracktotal = rawCopy.totaltracks;
+                delete rawCopy.totaltracks;
+                break;
+        }
+    });
+
+    song.other_tags = {...rawCopy};
+    return song;
 }
 
 module.exports = {
-    /**
-     *
-     * @param {Object} rawData
-     * @return {SongModel}
-     */
-    mapMetaTagsToProps(rawData) {
-        /**
-         *
-         * @type {SongModel}
-         */
-        const song = {};
-
-        songTags.forEach((tag) => {
-            if (rawData.hasOwnProperty(tag)) {
-                song[tag] = rawData[tag];
-                delete rawData[tag];
-            }
-        });
-
-        const tags = Object.keys(rawData);
-        tags.forEach((tag) => {
-            switch (tag) {
-                case 'codec_name':
-                    song.filetype = rawData['codec_name'];
-                    delete rawData['codec_name'];
-                    break;
-                case 'bits_per_raw_sample':
-                    song.bitrate = +rawData['bits_per_raw_sample'];
-                    delete rawData['bits_per_raw_sample'];
-                    break;
-                case 'bit_rate':
-                    song.bitrate = +rawData['bit_rate'];
-                    delete rawData['bit_rate'];
-                    break;
-                case 'album_artist':
-                    song.albumartist = rawData.album_artist;
-                    delete rawData.album_artist;
-                    break;
-                case 'totaltracks':
-                    song.tracktotal = rawData.totaltracks;
-                    delete rawData.totaltracks;
-                    break;
-            }
-        });
-
-        song.other_tags = {...rawData};
-        return song;
-    },
+    operatorsAliases,
+    mapMetaTagsToProps,
 
     /**
      *

@@ -5,8 +5,9 @@ const dbCommandResponder = require('../services/database-command-responder.servi
 const dbEventPublisher = require('../services/database-events-publisher.service');
 const songModel = require('../models/song.model');
 const playlistModel = require('../models/playlist.model');
+const stickersModel = require('../models/stickers-db.model');
 const logger = require('../services/database-logger.service');
-const {mapPlaylistDefinitionToQuery} = require('../libs/utils');
+const { mapPlaylistDefinitionToQuery } = require('../libs/utils');
 
 const scriptName = path.basename(__filename);
 
@@ -47,6 +48,7 @@ module.exports = () => {
                 await dbEventPublisher.publishProgress('start', list.length);
 
                 for (let i = 0, j = list.length; i < j; i++) {
+                    await stickersModel.updateStatisticsStickers(list[i]);
                     await songModel.songUpsert(list[i]);
                     await dbEventPublisher.publishProgress('ongoing', j, i);
                     await promisedTimeout(5);
