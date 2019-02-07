@@ -54,10 +54,9 @@ module.exports = {
      */
     searchForCover(files) {
         if (Array.isArray(files)) {
-            const cover = files.find((file) => {
+            return files.find((file) => {
                 return /\.(jpg|jpeg|png)$/i.test(file);
             });
-            return cover;
         }
     },
 
@@ -179,12 +178,17 @@ module.exports = {
         return new Promise((resolve, reject) => {
             const file = this.getFullPath(rawFileName);
             const pathObj = path.parse(file);
-            const statFile = path.join(pathObj.dir, `${pathObj.name}.json`);
-            fs.readFile(statFile, (err, rawData) => {
+            const statisticsFile = path.join(pathObj.dir, `${pathObj.name}.json`);
+            fs.readFile(statisticsFile, (err, rawData) => {
                 if (err) {
+                    if (err.code === 'ENOENT') {
+                        reject('ENOENT');
+                        return;
+                    }
                     const errMsg = `getSongSavedStatistics(${file}) failed (${scriptName}): `;
                     logger.errorLog(errMsg, err);
                     reject(err);
+                    return;
                 }
 
                 try {
