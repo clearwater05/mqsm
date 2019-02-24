@@ -157,7 +157,6 @@ module.exports = {
             cmdParams.push(filter.name, filter.value);
         }
 
-        cmdParams.push('group', 'album');
         const command = cmd('list', cmdParams);
 
         try {
@@ -169,7 +168,7 @@ module.exports = {
             }
             return list;
         } catch (e) {
-            const errMsg = `getSongList(${filter}) failed (153: ${scriptName}): `;
+            const errMsg = `getSongList(${command}) failed (153: ${scriptName}): `;
             logger.errorLog(errMsg, e);
             return [];
         }
