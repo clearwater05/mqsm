@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const ls = require('ls');
-const util = require('util');
+// const util = require('util');
 const ffmetadata = require('ffmetadata');
 const ffprobe = require('ffprobe');
 const ffprobeStatic = require('ffprobe-static');
@@ -9,7 +9,12 @@ const ffprobeStatic = require('ffprobe-static');
 const logger = require('./fs-logger.service');
 const {prepareMetaDataTags} = require('../libs/utils');
 
-const promisedTimeout = util.promisify(setTimeout);
+const promisedTimeout = time => {
+    return new Promise(resolve => {
+        setTimeout(resolve, time);
+    });
+};
+
 const scriptName = path.basename(__filename);
 
 const {
@@ -251,14 +256,18 @@ module.exports = {
      */
     async proceedFilesQueue(songList) {
         const result = [];
-        while (songList.length > 0) {
-            const list = songList.splice(0, READ_CHUNK_SIZE);
-            const songs = await this.getFilesListMetadata(list);
-            result.push(...songs);
-            await promisedTimeout(READ_PAUSE);
-        }
+        try {
+            while (songList.length > 0) {
+                const list = songList.splice(0, READ_CHUNK_SIZE);
+                const songs = await this.getFilesListMetadata(list);
+                result.push(...songs);
+                await promisedTimeout(READ_PAUSE);
+            }
 
-        return result;
+            return result;
+        } catch (e) {
+            logger.errorLog(`Can't proceed with files queue proceedFilesQueue(${songList}) (${scriptName}): `, e);
+        }
     },
 
     /**

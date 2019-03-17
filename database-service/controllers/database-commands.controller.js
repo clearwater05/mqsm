@@ -1,4 +1,4 @@
-const util = require('util');
+// const util = require('util');
 const path = require('path');
 
 const dbCommandResponder = require('../services/database-command-responder.service');
@@ -11,7 +11,11 @@ const { mapPlaylistDefinitionToQuery } = require('../libs/utils');
 
 const scriptName = path.basename(__filename);
 
-const promisedTimeout = util.promisify(setTimeout);
+const promisedTimeout = time => {
+    return new Promise(resolve => {
+        setTimeout(resolve, time);
+    });
+};
 
 const {
     UPDATE_DATABASE,
