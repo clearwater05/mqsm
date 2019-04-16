@@ -2,6 +2,7 @@ const cote = require('cote')({environment: 'mqm'});
 const {
     CURRENT_SONG,
     INCREASE_SONG_PLAYCOUNT,
+    INCREASE_SONG_SKIP_COUNT,
     CURRENT_MPD_STATUS,
     CURRENT_PLAYLIST,
     CURRENT_SONG_RATING_STICKER_VALUE
@@ -30,10 +31,21 @@ module.exports = {
     },
 
     /**
+     *
      * @param {string} song
+     * @returns {Promise<void>}
      */
     async updateSongStatistics(song) {
         await publisher.publish(INCREASE_SONG_PLAYCOUNT, song);
+    },
+
+    /**
+     *
+     * @param {string} song
+     * @returns {Promise<void>}
+     */
+    async increaseSongSkipCount(song) {
+        await publisher.publish(INCREASE_SONG_SKIP_COUNT, song);
     },
 
     /**
@@ -64,5 +76,10 @@ module.exports = {
             song,
             rating
         });
+    },
+
+    async publishSkipSongEvent(song) {
+        console.log(song);
     }
+
 };

@@ -58,14 +58,6 @@ module.exports = {
 
     /**
      *
-     * @return {string|*|string}
-     */
-    getPreviousSong() {
-        return mpdState.getMpdStatePropValue('previousSong') || '';
-    },
-
-    /**
-     *
      * @param command
      * @returns {Promise<any>}
      */
@@ -124,7 +116,7 @@ module.exports = {
      *
      * @returns {Promise<string>}
      */
-    async getCurrentSong() {
+    async requestCurrentSong() {
         const command = cmd('currentsong', []);
         try {
             const rawSong = await this.mpdClientSendCommand(command);
@@ -228,7 +220,7 @@ module.exports = {
         try {
             await this.mpdClientSendCommand(command);
         } catch (e) {
-            const errMsg = `sendPlayerCommand(${command}) failed (222: ${scriptName}): `;
+            const errMsg = `sendPlayerCommand(${command}) failed (226: ${scriptName}): `;
             logger.errorLog(errMsg, e);
         }
     }

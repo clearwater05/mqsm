@@ -20,6 +20,7 @@ const promisedTimeout = time => {
 const {
     UPDATE_DATABASE,
     INCREASE_SONG_PLAYCOUNT_COMMAND,
+    INCREASE_SONG_SKIP_COUNT_COMMAND,
     CURRENT_PLAYLIST_COMMAND,
     REQUEST_SONG_INFO,
     CLEANUP_DATABASE_COMMAND,
@@ -75,6 +76,15 @@ module.exports = () => {
         const song = req.value;
         const result = await songModel.updateSongStatistic(song);
 
+        cb(result);
+    });
+
+    /**
+     *
+     */
+    dbCommandResponder.on(INCREASE_SONG_SKIP_COUNT_COMMAND, async (req, cb) => {
+        const song = req.value;
+        const result = await songModel.increaseSkipCount(song);
         cb(result);
     });
 

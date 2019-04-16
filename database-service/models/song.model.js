@@ -99,7 +99,7 @@ Song.songUpsert = async (songInfo) => {
 /**
  *
  * @param song
- * @return {Promise<Model>}
+ * @return {Promise<Song>}
  */
 Song.getSongStatistics = async (song) => {
     return await Song.findOne({
@@ -129,6 +129,49 @@ Song.updateSongStatistic = async (song) => {
         return true;
     } catch (e) {
         const errMsg = `updateSongStatistic(${song}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+        return null;
+    }
+};
+
+/**
+ *
+ * @param song
+ * @returns {Promise<Song|*>}
+ */
+Song.getSongSkipCount = async (song) => {
+    try {
+        return await Song.findOne({
+            attributes: ['filename', 'skipcount'],
+            where: {
+                filename: song
+            }
+        });
+    } catch (e) {
+        const errMsg = `getSongSkipCount(${song}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+        return null;
+    }
+};
+
+/**
+ *
+ * @param song
+ * @returns {Promise<null|boolean>}
+ */
+Song.increaseSkipCount = async (song) => {
+    try {
+        const songModel = await Song.getSongSkipCount(song);
+        songModel.skipcount = +songModel.get('skipcount') + 1;
+
+        await songModel.save(
+            {
+                fields: ['skipcount']
+            }
+        );
+        return true;
+    } catch (e) {
+        const errMsg = `increaseSkipCount(${song}) failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
         return null;
     }

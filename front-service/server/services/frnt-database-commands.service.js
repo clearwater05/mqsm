@@ -2,6 +2,7 @@ const cote = require('cote')({environment: 'mqm'});
 const {
     UPDATE_DATABASE,
     INCREASE_SONG_PLAYCOUNT_COMMAND,
+    INCREASE_SONG_SKIP_COUNT_COMMAND,
     CURRENT_PLAYLIST_COMMAND,
     REQUEST_SONG_INFO,
     CLEANUP_DATABASE_COMMAND,
@@ -60,6 +61,22 @@ module.exports = {
         return new Promise((resolve) => {
             const req = {
                 type: INCREASE_SONG_PLAYCOUNT_COMMAND,
+                value: song
+            };
+
+            dbRequester.send(req, (result) => {
+                resolve(result);
+            });
+        });
+    },
+
+    /**
+     * @param {string} song
+     */
+    increaseSongScipCount(song) {
+        return new Promise((resolve) => {
+            const req = {
+                type: INCREASE_SONG_SKIP_COUNT_COMMAND,
                 value: song
             };
 

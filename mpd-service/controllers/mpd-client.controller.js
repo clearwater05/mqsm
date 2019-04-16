@@ -13,11 +13,25 @@ module.exports = () => {
         const list = await mpdClientService.getCurrentPlaylist();
         await eventsPublisher.publishCurrentPlaylist(list);
     };
+
+    /**
+     *
+     */
+    const publishSongSkiped = () => {
+        const songIsLocked = mpdState.getMpdStatePropValue('statisticLock');
+        const previousSong = mpdState.getMpdStatePropValue('previousSong');
+        const currentSong = mpdState.getMpdStatePropValue('currentSong');
+
+        if (!songIsLocked && currentSong !== previousSong) {
+            eventsPublisher.increaseSongSkipCount(previousSong);
+        }
+    };
+
     /**
      *
      */
     mpdClient.on('ready', async () => {
-        const song = await mpdClientService.getCurrentSong();
+        const song = await mpdClientService.requestCurrentSong();
         const status = await mpdClientService.requestCurrentStatus();
 
         if (song) {
@@ -35,18 +49,21 @@ module.exports = () => {
      *
      */
     mpdClient.on('system-player', async () => {
-        const song = await mpdClientService.getCurrentSong();
+        const song = await mpdClientService.requestCurrentSong();
         const status = await mpdClientService.requestCurrentStatus();
         const currentSongStateChanged = mpdClientService.manageCurrentSong(song);
+        // console.log(mpdState.getState());
 
         if (currentSongStateChanged && song) {
+            publishSongSkiped();
+
             mpdState.toggleStatisticsLock(false);
             await eventsPublisher.publishCurrentSong(song);
             publishCurrentPlaylist();
         }
 
         if (status) {
-            await eventsPublisher.publishCurrentStatus(status);
+            eventsPublisher.publishCurrentStatus(status);
         }
     });
 
@@ -55,7 +72,7 @@ module.exports = () => {
      *
      */
     mpdClient.on('system-sticker', async () => {
-        const song = await mpdClientService.getCurrentSong();
+        const song = await mpdClientService.requestCurrentSong();
         if (song) {
             const rating = await mpdClientService.getSongStickerInfo(song, 'rating');
             if (rating) {

@@ -10,6 +10,7 @@ const {
     CURRENT_SONG,
     UPDATE_DATABASE_PROGRESS,
     INCREASE_SONG_PLAYCOUNT,
+    INCREASE_SONG_SKIP_COUNT,
     UPDATE_DATABASE_PROGRESS_CLIENT,
     CURRENT_MPD_STATUS_CLIENT,
     CURRENT_PLAYLIST,
@@ -89,6 +90,13 @@ module.exports = (io) => {
         if (result) {
             await frntMpdCommandService.requestCurrentSong();
         }
+    });
+
+    /**
+     *
+     */
+    subscriber.on(INCREASE_SONG_SKIP_COUNT, (song) => {
+        frntDatabaseCommandsService.increaseSongScipCount(song);
     });
 
     /**
