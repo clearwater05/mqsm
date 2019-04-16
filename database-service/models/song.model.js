@@ -1,7 +1,11 @@
 const path = require('path');
 const Sequelize = require('sequelize');
 
-const {mapMetaTagsToProps} = require('../libs/utils');
+const {
+    mapMetaTagsToProps,
+    calculateAutoRating,
+    calculateCurrentAutoScore
+} = require('../libs/utils');
 const sequelize = require('../services/sequelize.service');
 const logger = require('../services/database-logger.service');
 
@@ -103,7 +107,7 @@ Song.songUpsert = async (songInfo) => {
  */
 Song.getSongStatistics = async (song) => {
     return await Song.findOne({
-        attributes: ['filename', 'fmps_playcount', 'lastplayed'],
+        attributes: ['filename', 'fmps_playcount', 'lastplayed', 'skipcount', 'autoscore', 'rating'],
         where: {
             filename: song
         }
@@ -172,6 +176,43 @@ Song.increaseSkipCount = async (song) => {
         return true;
     } catch (e) {
         const errMsg = `increaseSkipCount(${song}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+        return null;
+    }
+};
+
+/**
+ *
+ * @param {string} song
+ * @param {boolean} isSkip
+ * @returns {Promise<null|number>}
+ */
+Song.updateAutoScore = async (song, isSkip = false) => {
+    try {
+        const stat = await Song.getSongStatistics(song);
+        const {
+            autoscore,
+            rating,
+            fmps_playcount,
+            skipcount
+        } = stat.toJSON();
+
+        let currentAutoScore = +stat.autoscore;
+        if (!currentAutoScore) {
+            currentAutoScore = calculateCurrentAutoScore(+autoscore, +rating, +fmps_playcount);
+        }
+
+        const autoScore = calculateAutoRating(+currentAutoScore, +rating, +fmps_playcount, +skipcount, isSkip);
+        stat.autoscore = autoScore;
+        await stat.save(
+            {
+                fields: ['autoscore']
+            }
+        );
+
+        return autoScore;
+    } catch (e) {
+        const errMsg = `updateAutoScore(${song}) failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
         return null;
     }

@@ -3,6 +3,7 @@ const {
     UPDATE_DATABASE,
     INCREASE_SONG_PLAYCOUNT_COMMAND,
     INCREASE_SONG_SKIP_COUNT_COMMAND,
+    CALCULATE_SONG_AUTO_RATING_COMMAND,
     CURRENT_PLAYLIST_COMMAND,
     REQUEST_SONG_INFO,
     CLEANUP_DATABASE_COMMAND,
@@ -88,6 +89,50 @@ module.exports = {
 
     /**
      *
+     * @param song
+     * @param rating
+     * @return {Promise<any>}
+     */
+    updateSongRating(song, rating) {
+        return new Promise((resolve) => {
+            const req = {
+                type: UPDATE_SONG_RATING_COMMAND,
+                value: {
+                    song,
+                    rating
+                }
+            };
+
+            dbRequester.send(req, (result) => {
+                resolve(result);
+            });
+        });
+    },
+
+    /**
+     *
+     * @param {string} song
+     * @param {boolean} isSkip
+     * @returns {Promise<any>}
+     */
+    updateAutoScore(song, isSkip = false) {
+        return new Promise((resolve => {
+            const req = {
+                type: CALCULATE_SONG_AUTO_RATING_COMMAND,
+                value: {
+                    song,
+                    isSkip
+                }
+            };
+
+            dbRequester.send(req, result => {
+                resolve(result);
+            });
+        }));
+    },
+
+    /**
+     *
      * @param {string[]} playlist
      * @return {Promise<Object[]>}
      */
@@ -118,28 +163,6 @@ module.exports = {
             const req = {
                 type: CLEANUP_DATABASE_COMMAND,
                 value: fullList
-            };
-
-            dbRequester.send(req, (result) => {
-                resolve(result);
-            });
-        });
-    },
-
-    /**
-     *
-     * @param song
-     * @param rating
-     * @return {Promise<any>}
-     */
-    updateSongRating(song, rating) {
-        return new Promise((resolve) => {
-            const req = {
-                type: UPDATE_SONG_RATING_COMMAND,
-                value: {
-                    song,
-                    rating
-                }
             };
 
             dbRequester.send(req, (result) => {

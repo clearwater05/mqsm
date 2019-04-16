@@ -87,6 +87,8 @@ module.exports = (io) => {
      */
     subscriber.on(INCREASE_SONG_PLAYCOUNT, async (song) => {
         const result = await frntDatabaseCommandsService.updateSongStatistics(song);
+        await frntDatabaseCommandsService.updateAutoScore(song);
+
         if (result) {
             await frntMpdCommandService.requestCurrentSong();
         }
@@ -95,8 +97,9 @@ module.exports = (io) => {
     /**
      *
      */
-    subscriber.on(INCREASE_SONG_SKIP_COUNT, (song) => {
-        frntDatabaseCommandsService.increaseSongScipCount(song);
+    subscriber.on(INCREASE_SONG_SKIP_COUNT, async (song) => {
+        await frntDatabaseCommandsService.increaseSongScipCount(song);
+        await frntDatabaseCommandsService.updateAutoScore(song, true);
     });
 
     /**
@@ -127,6 +130,8 @@ module.exports = (io) => {
      */
     subscriber.on(CURRENT_SONG_RATING_STICKER_VALUE, async (value) => {
         const result = await frntDatabaseCommandsService.updateSongRating(value.song, value.rating);
+        await frntDatabaseCommandsService.updateAutoScore(value.song);
+
         if (Array.isArray(result) && result[0] === 1) {
             await frntMpdCommandService.requestCurrentSong();
         }

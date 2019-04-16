@@ -186,9 +186,58 @@ function mapMetaTagsToProps(rawData) {
     return song;
 }
 
+/**
+ *
+ * @param {number} currentAutoRating
+ * @param {number} rating
+ * @param {number} playCount
+ * @param {number} skipCount
+ * @param {boolean} isSkip
+ * @returns {number|*}
+ */
+function calculateAutoRating(currentAutoRating = 0, rating = 0, playCount = 1, skipCount = 0, isSkip = false) {
+    if ((playCount + skipCount) === 0) {
+        return 0;
+    }
+
+    const factor = Math.abs((rating * 10) - currentAutoRating) / (2 * (playCount + skipCount));
+
+    if (isSkip && playCount > 0) {
+        return currentAutoRating - factor;
+    }
+
+    if (isSkip && playCount === 0) {
+        return factor;
+    }
+
+    return currentAutoRating + factor;
+}
+
+/**
+ *
+ * @param {number} currentAutoScore
+ * @param {number} rating
+ * @param {number} playcount
+ * @returns {number}
+ */
+function calculateCurrentAutoScore(currentAutoScore, rating, playcount) {
+    if (currentAutoScore) {
+        return currentAutoScore;
+    }
+
+    let autoscore = +rating * 10 / 2;
+
+    for(let i = 2; i < playcount; i++) {
+        autoscore = calculateAutoRating(autoscore, rating, i);
+    }
+    return autoscore;
+}
+
 module.exports = {
     operatorsAliases,
     mapMetaTagsToProps,
+    calculateAutoRating,
+    calculateCurrentAutoScore,
 
     /**
      *

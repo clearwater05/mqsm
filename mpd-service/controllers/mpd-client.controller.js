@@ -21,8 +21,9 @@ module.exports = () => {
         const songIsLocked = mpdState.getMpdStatePropValue('statisticLock');
         const previousSong = mpdState.getMpdStatePropValue('previousSong');
         const currentSong = mpdState.getMpdStatePropValue('currentSong');
+        const isPlaying = mpdState.getMpdStatePropValue('state') === 'play';
 
-        if (!songIsLocked && currentSong !== previousSong) {
+        if (!songIsLocked && currentSong !== previousSong && isPlaying) {
             eventsPublisher.increaseSongSkipCount(previousSong);
         }
     };

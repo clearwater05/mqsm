@@ -7,7 +7,9 @@ const songModel = require('../models/song.model');
 const playlistModel = require('../models/playlist.model');
 const stickersModel = require('../models/stickers-db.model');
 const logger = require('../services/database-logger.service');
-const { mapPlaylistDefinitionToQuery } = require('../libs/utils');
+const {
+    mapPlaylistDefinitionToQuery
+} = require('../libs/utils');
 
 const scriptName = path.basename(__filename);
 
@@ -21,6 +23,7 @@ const {
     UPDATE_DATABASE,
     INCREASE_SONG_PLAYCOUNT_COMMAND,
     INCREASE_SONG_SKIP_COUNT_COMMAND,
+    CALCULATE_SONG_AUTO_RATING_COMMAND,
     CURRENT_PLAYLIST_COMMAND,
     REQUEST_SONG_INFO,
     CLEANUP_DATABASE_COMMAND,
@@ -91,6 +94,29 @@ module.exports = () => {
     /**
      *
      */
+    dbCommandResponder.on(UPDATE_SONG_RATING_COMMAND, async (req, cb) => {
+        const result = await songModel.setRating(req.value.song, req.value.rating);
+        if (Array.isArray(result) && result[0] === 1) {
+            cb(result);
+        }
+    });
+
+    /**
+     *
+     */
+    dbCommandResponder.on(CALCULATE_SONG_AUTO_RATING_COMMAND, async (req, cb) => {
+        const {
+            song,
+            isSkip
+        } = req.value;
+        const result = await songModel.updateAutoScore(song, isSkip);
+
+        cb(result);
+    });
+
+    /**
+     *
+     */
     dbCommandResponder.on(CURRENT_PLAYLIST_COMMAND, async (req, cb) => {
         const list = await songModel.getSonglist(req.value);
         cb(list);
@@ -103,16 +129,6 @@ module.exports = () => {
         const result = await songModel.cleanUpSongTable(req.value);
         await dbEventPublisher.publishCleanedSongCount(result);
         cb(result);
-    });
-
-    /**
-     *
-     */
-    dbCommandResponder.on(UPDATE_SONG_RATING_COMMAND, async (req, cb) => {
-        const result = await songModel.setRating(req.value.song, req.value.rating);
-        if (Array.isArray(result) && result[0] === 1) {
-            cb(result);
-        }
     });
 
     /**
