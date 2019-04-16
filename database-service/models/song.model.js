@@ -107,7 +107,14 @@ Song.songUpsert = async (songInfo) => {
  */
 Song.getSongStatistics = async (song) => {
     return await Song.findOne({
-        attributes: ['filename', 'fmps_playcount', 'lastplayed', 'skipcount', 'autoscore', 'rating'],
+        attributes: [
+            'filename',
+            'fmps_playcount',
+            'lastplayed',
+            'skipcount',
+            'autoscore',
+            'rating'
+        ],
         where: {
             filename: song
         }
@@ -197,12 +204,12 @@ Song.updateAutoScore = async (song, isSkip = false) => {
             skipcount
         } = stat.toJSON();
 
-        let currentAutoScore = +stat.autoscore;
+        let currentAutoScore = +autoscore;
         if (!currentAutoScore) {
-            currentAutoScore = calculateCurrentAutoScore(+autoscore, +rating, +fmps_playcount);
+            currentAutoScore = calculateCurrentAutoScore(+rating, +fmps_playcount);
         }
 
-        const autoScore = calculateAutoRating(+currentAutoScore, +rating, +fmps_playcount, +skipcount, isSkip);
+        const autoScore = calculateAutoRating(currentAutoScore, +rating, +fmps_playcount, +skipcount, isSkip);
         stat.autoscore = autoScore;
         await stat.save(
             {

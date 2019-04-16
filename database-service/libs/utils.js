@@ -215,21 +215,16 @@ function calculateAutoRating(currentAutoRating = 0, rating = 0, playCount = 1, s
 
 /**
  *
- * @param {number} currentAutoScore
  * @param {number} rating
  * @param {number} playcount
  * @returns {number}
  */
-function calculateCurrentAutoScore(currentAutoScore, rating, playcount) {
-    if (currentAutoScore) {
-        return currentAutoScore;
-    }
-
-    let autoscore = +rating * 10 / 2;
-
-    for(let i = 2; i < playcount; i++) {
+function calculateCurrentAutoScore(rating, playcount) {
+    let autoscore = 0;
+    for(let i = 1; i < playcount; i++) {
         autoscore = calculateAutoRating(autoscore, rating, i);
     }
+
     return autoscore;
 }
 

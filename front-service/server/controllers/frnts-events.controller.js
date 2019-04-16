@@ -130,7 +130,6 @@ module.exports = (io) => {
      */
     subscriber.on(CURRENT_SONG_RATING_STICKER_VALUE, async (value) => {
         const result = await frntDatabaseCommandsService.updateSongRating(value.song, value.rating);
-        await frntDatabaseCommandsService.updateAutoScore(value.song);
 
         if (Array.isArray(result) && result[0] === 1) {
             await frntMpdCommandService.requestCurrentSong();
