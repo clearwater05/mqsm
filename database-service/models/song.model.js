@@ -314,7 +314,15 @@ Song.getAttributes = async () => {
 Song.getStatistics = async list => {
     try {
         return await Song.findAll({
-            attributes: ['filename', 'lastplayed', 'rating', 'fmps_playcount', 'fmps_rating'],
+            attributes: [
+                'filename',
+                'lastplayed',
+                'rating',
+                'fmps_playcount',
+                'fmps_rating',
+                'skipcount',
+                'autoscore'
+            ],
             where: {
                 filename: {
                     $in: list
