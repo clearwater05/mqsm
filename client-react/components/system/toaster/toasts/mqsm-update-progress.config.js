@@ -18,7 +18,7 @@ export default (props) => {
     const progress = calculateProgress(props);
 
     return {
-        className: 'pt-dark',
+        className: 'bp3-dark',
         icon: 'cloud-upload',
         message: (
             <ProgressBar animate={false}

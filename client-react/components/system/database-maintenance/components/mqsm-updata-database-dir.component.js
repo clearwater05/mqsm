@@ -5,7 +5,7 @@ export default (props) => {
     let dirs;
     if (props.dirs && props.dirs.length > 0 && props.showDirsList) {
         dirs = (
-            <div className="mqsm-dirs-select-list pt-dark">
+            <div className="mqsm-dirs-select-list bp3-dark">
                 {props.dirs.map((dir, index) => (
                     <div className="mqsm-dir-list-option"
                          key={index}

@@ -1,11 +1,11 @@
 const cote = require('cote')({environment: 'mqm'});
-const path = require('path');
 
 const {
     REQUEST_COVER,
     REQUEST_FILE_METADATA,
     REQUEST_FILES_LIST_METADATA,
-    REQUEST_DIR_LIST
+    REQUEST_DIR_LIST,
+    DUMP_STATISTICS_TO_FILES
 } = require('../../front.constants');
 
 const fsRequester = new cote.Requester({
@@ -16,15 +16,15 @@ const fsRequester = new cote.Requester({
 module.exports = {
     /**
      *
-     * @param {string} song
+     * @param {string} albumPath
      * @returns {Promise<any>}
      */
-    getCoverForAlbum(song) {
+    getCoverForAlbum(albumPath) {
         return new Promise((resolve, reject) => {
-            if (song) {
+            if (albumPath) {
                 const req = {
                     type: REQUEST_COVER,
-                    value: path.dirname(song)
+                    value: albumPath
                 };
 
                 fsRequester.send(req, (res) => {
@@ -92,6 +92,24 @@ module.exports = {
             };
 
             fsRequester.send(req, (res) => {
+                resolve(res);
+            });
+        });
+    },
+
+    /**
+     *
+     * @param {Array} statistics
+     * @returns {Promise<any>}
+     */
+    dumpStatistics(statistics) {
+        return new Promise(resolve => {
+            const req = {
+                type: DUMP_STATISTICS_TO_FILES,
+                value: statistics
+            };
+
+            fsRequester.send(req, res => {
                 resolve(res);
             });
         });

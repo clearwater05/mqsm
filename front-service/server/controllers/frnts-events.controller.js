@@ -1,26 +1,16 @@
+const path = require('path');
 const frntFileCommandService = require('../services/frnt-file-commands.service');
 const frntDatabaseCommandsService = require('../services/frnt-database-commands.service');
 const frntMpdCommandService = require('../services/frnt-mpd-commands.service');
 const subscriber = require('../services/frnt-events-subscriber.service');
 const logger = require('../services/frnt-logger.service');
 
-/**
- *
- * @param {Object[]} arr
- * @return {Object}
- */
-function songsArrayToSongsObject(arr) {
-    return arr.reduce((obj, song) => {
-        obj[song.filename] = {...song};
-        return obj;
-    }, {});
-}
-
 const {
     CURRENT_MPD_STATUS,
     CURRENT_SONG,
     UPDATE_DATABASE_PROGRESS,
     INCREASE_SONG_PLAYCOUNT,
+    INCREASE_SONG_SKIP_COUNT,
     UPDATE_DATABASE_PROGRESS_CLIENT,
     CURRENT_MPD_STATUS_CLIENT,
     CURRENT_PLAYLIST,
@@ -35,11 +25,39 @@ const {
     SYSTEM_ERROR
 } = require('../../front.constants');
 
-
+const {
+    groupPlaylistByAlbum,
+    songsArrayToSongsObject
+} = require('../libs/frnt-utils');
 
 module.exports = (io) => {
-    let cachedRawPlaylist = [];
-    let cachedFullPlaylist = {};
+    /**
+     *
+     * @param list
+     * @return {Promise<Array|*>}
+     */
+    const createFullSongList = async (list) => {
+        const dbInfo = await frntDatabaseCommandsService.getPlaylist(list);
+        const cachedList = songsArrayToSongsObject(dbInfo);
+
+        const result = list.map((item) => {
+            const obj = cachedList[item];
+            return {...obj};
+        });
+
+        const groupedList = groupPlaylistByAlbum(result);
+
+        try {
+            for (let i = 0, j = groupedList.length; i < j; i++) {
+                groupedList[i].cover = await frntFileCommandService.getCoverForAlbum(groupedList[i].album_path);
+            }
+        } catch (e) {
+            logger.errorLog('get cover error: ', e, new Date());
+            await io.emit('action', {type: SYSTEM_ERROR_CLIENT, data: e});
+        }
+
+        return groupedList;
+    };
 
     /**
      *
@@ -54,7 +72,7 @@ module.exports = (io) => {
     subscriber.on(CURRENT_SONG, async (song) => {
         try {
             const songInfo = await frntDatabaseCommandsService.getSong(song);
-            const cover = await frntFileCommandService.getCoverForAlbum(song);
+            const cover = await frntFileCommandService.getCoverForAlbum(path.dirname(song));
 
             songInfo.cover = cover;
             await io.emit('action', {type: CURRENT_SONG_INFO_CLIENT, data: {...songInfo}});
@@ -69,9 +87,19 @@ module.exports = (io) => {
      */
     subscriber.on(INCREASE_SONG_PLAYCOUNT, async (song) => {
         const result = await frntDatabaseCommandsService.updateSongStatistics(song);
+        await frntDatabaseCommandsService.updateAutoScore(song);
+
         if (result) {
             await frntMpdCommandService.requestCurrentSong();
         }
+    });
+
+    /**
+     *
+     */
+    subscriber.on(INCREASE_SONG_SKIP_COUNT, async (song) => {
+        await frntDatabaseCommandsService.increaseSongScipCount(song);
+        await frntDatabaseCommandsService.updateAutoScore(song, true);
     });
 
     /**
@@ -85,25 +113,9 @@ module.exports = (io) => {
      *
      */
     subscriber.on(CURRENT_PLAYLIST, async (playlist) => {
-        const b = new Set(cachedRawPlaylist);
-        const difference = playlist.filter(x => !b.has(x));
+        const groupedList = await createFullSongList(playlist);
 
-        const list = await frntDatabaseCommandsService.getPlaylist(difference);
-
-        for (let i = 0, j = list.length; i < j; i++) {
-            list[i].cover = await frntFileCommandService.getCoverForAlbum(list[i].filename);
-        }
-
-        const cachedList = songsArrayToSongsObject(list);
-
-        const result = playlist.map((item) => {
-            const obj = cachedList[item] || cachedFullPlaylist[item];
-            return {...obj};
-        });
-
-        cachedRawPlaylist = playlist.slice(0);
-        cachedFullPlaylist = songsArrayToSongsObject(result);
-        await io.emit('action', {type: CURRENT_PLAYLIST_CLIENT, data: result});
+        await io.emit('action', {type: CURRENT_PLAYLIST_CLIENT, data: groupedList});
     });
 
     /**
@@ -118,6 +130,7 @@ module.exports = (io) => {
      */
     subscriber.on(CURRENT_SONG_RATING_STICKER_VALUE, async (value) => {
         const result = await frntDatabaseCommandsService.updateSongRating(value.song, value.rating);
+
         if (Array.isArray(result) && result[0] === 1) {
             await frntMpdCommandService.requestCurrentSong();
         }

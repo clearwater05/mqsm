@@ -1,0 +1,7 @@
+.mqsm-current-playlist {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(96vh - #{$top-panel-height});
+  max-height: -moz-calc(96vh - #{$top-panel-height});
+  max-height: -webkit-calc(96vh - #{$top-panel-height});
+}

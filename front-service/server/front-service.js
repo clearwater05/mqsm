@@ -18,4 +18,8 @@ server.listen(SERVER_PORT);
 app.use(express.static(path.join(__dirname, SERVER_PUBLIC_PATH)));
 io.use(actionsMiddleware);
 
+app.use(function (req, res) {
+    res.redirect('/');
+});
+
 require('./controllers/frnts-events.controller')(io);

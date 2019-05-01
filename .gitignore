@@ -2,6 +2,8 @@ node_modules
 .idea
 front-service/server/public/css
 front-service/server/public/js
+front-service/server/public/images
 database-service/data/mqm.db
 package-lock.json
 mqsm.log
+.directory

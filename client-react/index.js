@@ -12,7 +12,8 @@ import './all.scss';
 const address = `${window.location.hostname}:${window.location.port}`;
 const socket = io(address);
 const socketIoMiddleware = createSocketIoMiddleware(socket, ['COMMAND:', 'EVENT:']);
-const store = applyMiddleware(socketIoMiddleware)(createStore)(reducer);
+const store = applyMiddleware(socketIoMiddleware)(createStore)(reducer,
+    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 
 ReactDOM.render(
     <Provider store={store}>

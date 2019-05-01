@@ -12,6 +12,7 @@ const {
     REQUEST_NEXT,
     REQUEST_PREVIOUS,
     MPD_PLAYER_COMMAND,
+    REQUEST_CURRENT_PLAYLIST
 } = require('../mpd-service.contants');
 
 module.exports = () => {
@@ -29,9 +30,22 @@ module.exports = () => {
      *
      */
     responder.on(REQUEST_CURRENT_SONG, async (req, cb) => {
-        const song = await mpdClientService.getCurrentSong();
+        const song = await mpdClientService.requestCurrentSong();
         if (song) {
             await eventsPublisher.publishCurrentSong(song);
+            cb(true);
+            return;
+        }
+        cb(false);
+    });
+
+    /**
+     *
+     */
+    responder.on(REQUEST_CURRENT_PLAYLIST, async (req, cb) => {
+        const playList = await mpdClientService.getCurrentPlaylist();
+        if (Array.isArray(playList)) {
+            await eventsPublisher.publishCurrentPlaylist(playList);
             cb(true);
             return;
         }

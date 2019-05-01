@@ -10,7 +10,7 @@ import { Button } from '@blueprintjs/core';
  */
 export default (props) => {
     return (
-        <Link to={`/${props.link}`}>
+        <Link to={`/${props.link}`} className="bp3-dark">
             <div className="list-group-item flex-column justify-content-center mqsm-left-menu-item">
                 <Button large={true} icon={props.icon}/>
                 <span className="mqsm-left-menu-item-text">{props.menuText}</span>

@@ -8,13 +8,15 @@ import CompleteUpdate from './components/mqsm-complete-database-update.component
 import UpdateSince from './components/mqsm-update-database-since.component';
 import UpdateFromDir from './components/mqsm-updata-database-dir.component';
 import SynchronizeDatabase from './components/mqsm-synchronize-database.component';
+import DumpStatistics from './components/mqsm-dump-statistics.component';
 
 import {
     updateDatabase,
     updateDatabaseSince,
     updateDatabaseFromDirName,
     databaseCleanUp,
-    requestDirList
+    requestDirList,
+    dumpStatistics
 } from '../../../actions/system.actions';
 
 
@@ -31,7 +33,7 @@ class MQSMDatabaseMaintenance extends Component {
             showDirList: false
         };
 
-        this.mainClass = 'mqsm-database-maintenance-component';
+        this.mainClass = 'bp3-dark mqsm-database-maintenance-component';
         this.sectionClass = 'mqsm-database-maintenance-section';
         this.requestDirList = _.debounce(this.props.requestDirList, 500);
 
@@ -44,6 +46,7 @@ class MQSMDatabaseMaintenance extends Component {
         this.handleFocus = this.handleFocus.bind(this);
         this.selectDir = this.selectDir.bind(this);
         this.updateDir = this.updateDir.bind(this);
+        this.dumpStatistics = this.dumpStatistics.bind(this);
     }
 
     /**
@@ -128,6 +131,13 @@ class MQSMDatabaseMaintenance extends Component {
 
     /**
      *
+     */
+    dumpStatistics() {
+        this.props.dumpStatistics();
+    }
+
+    /**
+     *
      * @return {*}
      */
     render() {
@@ -140,7 +150,7 @@ class MQSMDatabaseMaintenance extends Component {
                 <div className="row">
                     <div className="col-6">
                         <div className={this.sectionClass}>
-                            <CompleteUpdate/>
+                            <CompleteUpdate onUpdateRequest={this.completeDBUpdate}/>
                         </div>
                         <div className={this.sectionClass}>
                             <UpdateFromDir handleDirChange={this.handleDirChange}
@@ -161,6 +171,9 @@ class MQSMDatabaseMaintenance extends Component {
                         <div className={this.sectionClass}>
                             <SynchronizeDatabase synchronizeIt={this.synchronizeIt}/>
                         </div>
+                        <div className={this.sectionClass}>
+                            <DumpStatistics dumpStatistics={this.dumpStatistics}/>
+                        </div>
                     </div>
                 </div>
             </Card>
@@ -179,5 +192,6 @@ export default connect(mapStateToProps, {
     updateDatabaseSince,
     updateDatabaseFromDirName,
     databaseCleanUp,
-    requestDirList
+    requestDirList,
+    dumpStatistics
 })(MQSMDatabaseMaintenance);

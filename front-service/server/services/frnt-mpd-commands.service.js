@@ -3,7 +3,8 @@ const {
     REQUEST_SONGS_LIST,
     REQUEST_CURRENT_SONG,
     REQUEST_MPD_STATUS,
-    MPD_PLAYER_COMMAND
+    MPD_PLAYER_COMMAND,
+    REQUEST_CURRENT_PLAYLIST
 } = require('../../front.constants');
 
 const mpdRequester = new cote.Requester({
@@ -57,6 +58,22 @@ module.exports = {
         return new Promise((resolve) => {
             const req = {
                 type: REQUEST_MPD_STATUS
+            };
+
+            mpdRequester.send(req, (res) => {
+                resolve(res);
+            });
+        });
+    },
+
+    /**
+     *
+     * @return {Promise<any>}
+     */
+    requestCurrentPlaylist() {
+        return new Promise((resolve) => {
+            const req = {
+                type: REQUEST_CURRENT_PLAYLIST
             };
 
             mpdRequester.send(req, (res) => {

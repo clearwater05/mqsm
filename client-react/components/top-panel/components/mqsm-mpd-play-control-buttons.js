@@ -1,5 +1,8 @@
-import React from 'react';
+import React, {PureComponent} from 'react';
 import {ButtonGroup, Button, Intent} from '@blueprintjs/core';
+import {connect} from 'react-redux';
+
+import {sendMPDPlayerCommand} from '../../../actions/current.actions';
 
 import {
     REQUEST_STOP,
@@ -9,33 +12,52 @@ import {
     REQUEST_PAUSE
 } from '../../../front.constants';
 
-export default (props) => {
-    return (
-        <ButtonGroup minimal={false} large={true}>
-            <Button icon="step-backward" intent={Intent.PRIMARY}
-                    onClick={() => {
-                        props.sendMPDPlayerCommand(REQUEST_PREVIOUS);
-                    }}
-                    disabled={props.state === 'pause' || props.state === 'stop'}/>
-            <Button icon={props.state === 'stop' ? 'play' : 'stop'}
-                    disabled={props.state === 'pause'}
-                    onClick={() => {
-                        const command = props.state === 'stop' ? REQUEST_PLAY : REQUEST_STOP;
-                        props.sendMPDPlayerCommand(command);
-                    }}
-                    intent={Intent.PRIMARY}/>
-            <Button icon={props.state === 'pause' ? 'play' : 'pause'}
-                    disabled={props.state === 'stop'}
-                    onClick={() => {
-                        const command = props.state === 'pause' ? REQUEST_PLAY : REQUEST_PAUSE;
-                        props.sendMPDPlayerCommand(command);
-                    }}
-                    intent={Intent.PRIMARY}/>
-            <Button icon="step-forward" intent={Intent.PRIMARY}
-                    onClick={() => {
-                        props.sendMPDPlayerCommand(REQUEST_NEXT);
-                    }}
-                    disabled={props.state === 'pause'|| props.state === 'stop'}/>
-        </ButtonGroup>
-    );
-};
+
+class MPDPlayControls extends PureComponent {
+    /**
+     *
+     * @return {*}
+     */
+    render() {
+        const state = this.props.status.state;
+
+        return (
+            <ButtonGroup minimal={false} large={true}>
+                <Button icon="step-backward" intent={Intent.PRIMARY}
+                        onClick={() => {
+                            this.props.sendMPDPlayerCommand(REQUEST_PREVIOUS);
+                        }}
+                        disabled={state === 'pause' || state === 'stop'}/>
+                <Button icon={state === 'stop' ? 'play' : 'stop'}
+                        disabled={state === 'pause'}
+                        onClick={() => {
+                            const command = state === 'stop' ? REQUEST_PLAY : REQUEST_STOP;
+                            this.props.sendMPDPlayerCommand(command);
+                        }}
+                        intent={Intent.PRIMARY}/>
+                <Button icon={state === 'pause' ? 'play' : 'pause'}
+                        disabled={state === 'stop'}
+                        onClick={() => {
+                            const command = state === 'pause' ? REQUEST_PLAY : REQUEST_PAUSE;
+                            this.props.sendMPDPlayerCommand(command);
+                        }}
+                        intent={Intent.PRIMARY}/>
+                <Button icon="step-forward" intent={Intent.PRIMARY}
+                        onClick={() => {
+                            this.props.sendMPDPlayerCommand(REQUEST_NEXT);
+                        }}
+                        disabled={state === 'pause'|| state === 'stop'}/>
+            </ButtonGroup>
+        );
+    }
+}
+
+function mapStateToProps(state) {
+    return {
+        status: state.mpdEvents.mpdStatus
+    };
+}
+
+export default connect(mapStateToProps, {
+    sendMPDPlayerCommand
+})(MPDPlayControls);

@@ -1,12 +1,15 @@
 const path = require('path');
 const Sequelize = require('sequelize');
 
-const {mapMetaTagsToProps} = require('../libs/utils');
+const {
+    mapMetaTagsToProps,
+    calculateAutoRating,
+    calculateCurrentAutoScore
+} = require('../libs/utils');
 const sequelize = require('../services/sequelize.service');
 const logger = require('../services/database-logger.service');
 
 const scriptName = path.basename(__filename);
-const Op = Sequelize.Op;
 
 const Song = sequelize.define('song', {
     filename: {type: Sequelize.STRING, allowNull: false, primaryKey: true},
@@ -100,11 +103,18 @@ Song.songUpsert = async (songInfo) => {
 /**
  *
  * @param song
- * @return {Promise<Model>}
+ * @return {Promise<Song>}
  */
 Song.getSongStatistics = async (song) => {
     return await Song.findOne({
-        attributes: ['filename', 'fmps_playcount', 'lastplayed'],
+        attributes: [
+            'filename',
+            'fmps_playcount',
+            'lastplayed',
+            'skipcount',
+            'autoscore',
+            'rating'
+        ],
         where: {
             filename: song
         }
@@ -113,45 +123,125 @@ Song.getSongStatistics = async (song) => {
 
 /**
  *
- * @param {string} song
- * @return {Promise<void>}
+ * @param song
+ * @return {Promise<*>}
  */
 Song.updateSongStatistic = async (song) => {
     const savedStatistics = await Song.getSongStatistics(song);
-    savedStatistics.set({
-        lastplayed: new Date(),
-        fmps_playcount: +savedStatistics.get('fmps_playcount') + 1
-    });
-    await savedStatistics
-        .save(
+
+    savedStatistics.lastplayed = new Date();
+    savedStatistics.fmps_playcount = +savedStatistics.get('fmps_playcount') + 1;
+    try {
+        await savedStatistics.save(
             {
                 fields: ['lastplayed', 'fmps_playcount']
             }
-        )
-        .then(() => true)
-        .catch(() => {
-            const errMsg = `updateSongStatistic(${song}) failed (${scriptName}): `;
-            logger.errorLog(errMsg, e);
-            return null;
-        });
+        );
+        return true;
+    } catch (e) {
+        const errMsg = `updateSongStatistic(${song}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+        return null;
+    }
 };
 
 /**
  *
- * @param {string[]} rawList
+ * @param song
+ * @returns {Promise<Song|*>}
+ */
+Song.getSongSkipCount = async (song) => {
+    try {
+        return await Song.findOne({
+            attributes: ['filename', 'skipcount'],
+            where: {
+                filename: song
+            }
+        });
+    } catch (e) {
+        const errMsg = `getSongSkipCount(${song}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+        return null;
+    }
+};
+
+/**
+ *
+ * @param song
+ * @returns {Promise<null|boolean>}
+ */
+Song.increaseSkipCount = async (song) => {
+    try {
+        const songModel = await Song.getSongSkipCount(song);
+        songModel.skipcount = +songModel.get('skipcount') + 1;
+
+        await songModel.save(
+            {
+                fields: ['skipcount']
+            }
+        );
+        return true;
+    } catch (e) {
+        const errMsg = `increaseSkipCount(${song}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+        return null;
+    }
+};
+
+/**
+ *
+ * @param {string} song
+ * @param {boolean} isSkip
+ * @returns {Promise<null|number>}
+ */
+Song.updateAutoScore = async (song, isSkip = false) => {
+    try {
+        const stat = await Song.getSongStatistics(song);
+        const {
+            autoscore,
+            rating,
+            fmps_playcount,
+            skipcount
+        } = stat.toJSON();
+
+        let currentAutoScore = +autoscore;
+        if (!currentAutoScore) {
+            currentAutoScore = calculateCurrentAutoScore(+rating, +fmps_playcount);
+        }
+
+        const autoScore = calculateAutoRating(currentAutoScore, +rating, +fmps_playcount, +skipcount, isSkip);
+        stat.autoscore = autoScore;
+        await stat.save(
+            {
+                fields: ['autoscore']
+            }
+        );
+
+        return autoScore;
+    } catch (e) {
+        const errMsg = `updateAutoScore(${song}) failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+        return null;
+    }
+};
+
+/**
+ *
+ * @param {string[]} list
  * @return {Promise<Array<Model>>}
  */
-Song.getPlaylist = async (rawList) => {
+Song.getSonglist = async (list) => {
     try {
         return await Song.findAll({
+            attributes: ['filename', 'track', 'title', 'rating', 'album', 'artist', 'duration', 'album_path', 'date'],
             where: {
                 filename: {
-                    [Op.in]: rawList
+                    $in: list
                 }
             }
         });
     } catch (e) {
-        const errMsg = `getPlaylist() failed (${scriptName}): `;
+        const errMsg = `getSonglist() failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
     }
 };
@@ -166,7 +256,7 @@ Song.cleanUpSongTable = async (fullSongList) => {
         const cleaned = await Song.destroy({
             where: {
                 filename: {
-                    [Op.notIn]: fullSongList
+                    $notIn: fullSongList
                 }
             }
         });
@@ -199,6 +289,49 @@ Song.setRating = async (song, rating) => {
         const errMsg = `setRating(${song}, ${rating}) failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
         return null;
+    }
+};
+
+/**
+ *
+ * @returns {Promise<null>}
+ */
+Song.getAttributes = async () => {
+    try {
+        return await Song.describe();
+    } catch (e) {
+        const errMsg = `getAttributes() failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
+        return null;
+    }
+};
+
+/**
+ *
+ * @param {Array} list
+ * @returns {Promise<*>}
+ */
+Song.getStatistics = async list => {
+    try {
+        return await Song.findAll({
+            attributes: [
+                'filename',
+                'lastplayed',
+                'rating',
+                'fmps_playcount',
+                'fmps_rating',
+                'skipcount',
+                'autoscore'
+            ],
+            where: {
+                filename: {
+                    $in: list
+                }
+            }
+        });
+    } catch (e) {
+        const errMsg = `getStatistics() failed (${scriptName}): `;
+        logger.errorLog(errMsg, e);
     }
 };
 

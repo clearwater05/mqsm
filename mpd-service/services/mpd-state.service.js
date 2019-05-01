@@ -42,7 +42,7 @@ module.exports = {
      * @param {boolean} state
      */
     toggleStatisticsLock(state) {
-        mpdState.statisticLock = state;
+        this.setState('statisticLock', state);
     },
 
     /**

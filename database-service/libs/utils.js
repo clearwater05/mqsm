@@ -1,3 +1,6 @@
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+
 /**
  * @typedef {Object} SongModel
  * @property filename
@@ -40,6 +43,14 @@
  * @property ctime
  * @property filesize
  * 
+ */
+
+/**
+ * @typedef {Object} StickersModel
+ * @property {String} type
+ * @property {String} uri
+ * @property {String} name
+ * @property {String} value
  */
 
 /**
@@ -88,53 +99,146 @@ const songTags = [
     'filesize'
 ];
 
-module.exports = {
+const operatorsAliases = {
+    $eq: Op.eq,
+    $ne: Op.ne,
+    $gte: Op.gte,
+    $gt: Op.gt,
+    $lte: Op.lte,
+    $lt: Op.lt,
+    $not: Op.not,
+    $in: Op.in,
+    $notIn: Op.notIn,
+    $is: Op.is,
+    $like: Op.like,
+    $notLike: Op.notLike,
+    $iLike: Op.iLike,
+    $notILike: Op.notILike,
+    $regexp: Op.regexp,
+    $notRegexp: Op.notRegexp,
+    $iRegexp: Op.iRegexp,
+    $notIRegexp: Op.notIRegexp,
+    $between: Op.between,
+    $notBetween: Op.notBetween,
+    $overlap: Op.overlap,
+    $contains: Op.contains,
+    $contained: Op.contained,
+    $adjacent: Op.adjacent,
+    $strictLeft: Op.strictLeft,
+    $strictRight: Op.strictRight,
+    $noExtendRight: Op.noExtendRight,
+    $noExtendLeft: Op.noExtendLeft,
+    $and: Op.and,
+    $or: Op.or,
+    $any: Op.any,
+    $all: Op.all,
+    $values: Op.values,
+    $col: Op.col
+};
+
+/**
+ *
+ * @param {Object} rawData
+ * @return {SongModel}
+ */
+function mapMetaTagsToProps(rawData) {
+    const rawCopy = {...rawData};
     /**
      *
-     * @param {Object} rawData
-     * @return {Song}
+     * @type {SongModel}
      */
-    mapMetaTagsToProps(rawData) {
-        /**
-         *
-         * @type {SongModel}
-         */
-        const data = {};
+    const song = {};
 
-        songTags.forEach((tag) => {
-            if (rawData.hasOwnProperty(tag)) {
-                data[tag] = rawData[tag];
-                delete rawData[tag];
-            }
-        });
+    songTags.forEach((tag) => {
+        if (rawCopy.hasOwnProperty(tag)) {
+            song[tag] = rawCopy[tag];
+            delete rawCopy[tag];
+        }
+    });
 
-        const tags = Object.keys(rawData);
-        tags.forEach((tag) => {
-            switch (tag) {
-                case 'codec_name':
-                    data.filetype = rawData['codec_name'];
-                    delete rawData['codec_name'];
-                    break;
-                case 'bits_per_raw_sample':
-                    data.bitrate = +rawData['bits_per_raw_sample'];
-                    delete rawData['bits_per_raw_sample'];
-                    break;
-                case 'bit_rate':
-                    data.bitrate = +rawData['bit_rate'];
-                    delete rawData['bit_rate'];
-                    break;
-                case 'album_artist':
-                    data.albumartist = rawData.album_artist;
-                    delete rawData.album_artist;
-                    break;
-                case 'totaltracks':
-                    data.tracktotal = rawData.totaltracks;
-                    delete rawData.totaltracks;
-                    break;
-            }
-        });
+    const tags = Object.keys(rawCopy);
+    tags.forEach((tag) => {
+        switch (tag) {
+            case 'codec_name':
+                song.filetype = rawCopy['codec_name'];
+                delete rawCopy['codec_name'];
+                break;
+            case 'bits_per_raw_sample':
+                song.bitrate = +rawCopy['bits_per_raw_sample'];
+                delete rawCopy['bits_per_raw_sample'];
+                break;
+            case 'bit_rate':
+                song.bitrate = +rawCopy['bit_rate'];
+                delete rawCopy['bit_rate'];
+                break;
+            case 'album_artist':
+                song.albumartist = rawCopy.album_artist;
+                delete rawCopy.album_artist;
+                break;
+            case 'totaltracks':
+                song.tracktotal = rawCopy.totaltracks;
+                delete rawCopy.totaltracks;
+                break;
+        }
+    });
 
-        data.other_tags = {...rawData};
-        return data;
+    song.other_tags = {...rawCopy};
+    return song;
+}
+
+/**
+ *
+ * @param {number} currentAutoRating
+ * @param {number} rating
+ * @param {number} playCount
+ * @param {number} skipCount
+ * @param {boolean} isSkip
+ * @returns {number|*}
+ */
+function calculateAutoRating(currentAutoRating = 0, rating = 0, playCount = 1, skipCount = 0, isSkip = false) {
+    if ((playCount + skipCount) === 0) {
+        return 0;
+    }
+
+    const factor = Math.abs((rating * 10) - currentAutoRating) / (2 * (playCount + skipCount));
+
+    if (isSkip && playCount > 0) {
+        return currentAutoRating - factor;
+    }
+
+    if (isSkip && playCount === 0) {
+        return factor;
+    }
+
+    return currentAutoRating + factor;
+}
+
+/**
+ *
+ * @param {number} rating
+ * @param {number} playcount
+ * @returns {number}
+ */
+function calculateCurrentAutoScore(rating, playcount) {
+    let autoscore = 0;
+    for(let i = 1; i < playcount; i++) {
+        autoscore = calculateAutoRating(autoscore, rating, i);
+    }
+
+    return autoscore;
+}
+
+module.exports = {
+    operatorsAliases,
+    mapMetaTagsToProps,
+    calculateAutoRating,
+    calculateCurrentAutoScore,
+
+    /**
+     *
+     * @param {Object} definition
+     */
+    mapPlaylistDefinitionToQuery(definition) {
+        console.log(definition);
     }
 };

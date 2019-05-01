@@ -4,8 +4,7 @@ import {
     UPDATE_DATABASE_DIR_NAME,
     CLEANUP_DATABASE,
     REQUEST_DIR_LIST,
-    REQUEST_CURRENT_SONG,
-    REQUEST_MPD_STATUS
+    DUMP_DATABASE_COMMAND
 } from '../front.constants';
 
 /**
@@ -66,27 +65,10 @@ export function requestDirList(baseDir) {
 
 /**
  *
- * @return {{type: string}}
+ * @returns {{type: string}}
  */
-export function requestCurrentSong() {
+export function dumpStatistics() {
     return {
-        type: REQUEST_CURRENT_SONG
-    };
-}
-
-export function requestMPDStatus() {
-    return {
-        type: REQUEST_MPD_STATUS
-    };
-}
-
-/**
- *
- * @param {string} command
- * @return {{type: <string>}}
- */
-export function sendMPDPlayerCommand(command) {
-    return {
-        type: command
+        type: DUMP_DATABASE_COMMAND
     };
 }

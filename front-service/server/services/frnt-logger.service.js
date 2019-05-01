@@ -52,7 +52,7 @@ module.exports = {
         logger.log({
             level: 'info',
             timestamp,
-            message: message,
+            message,
             event
         });
     }

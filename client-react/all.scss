@@ -6,22 +6,35 @@
 @import "~@blueprintjs/core/lib/scss/variables.scss";
 @import "~@blueprintjs/icons/lib/scss/variables.scss";
 @import "~css-star-rating/scss/star-rating.scss";
+
+@import "./overrides.scss";
 @import "./mqsm-variables.scss";
+@import "./mqsm-common-styles.scss";
 
 @import "./components/mqsm-common-components/mqsm-icon.scss";
-@import "./components/mqsm-common-components/mqsm-cover.scss";
+@import "./components/mqsm-cover/mqsm-cover";
 @import "./components/mqsm-common-components/mqsm-star-rating.scss";
-@import "components/mqsm-app";
+@import "./components/mqsm-app";
+
+@import "./components/mqsm-song/mqsm-song";
+@import "./components/mqsm-album/mqsm-album.scss";
 
 /* top panel */
 @import "./components/top-panel/mqsm-top-panel.scss";
 
 /* left menu */
-@import "components/left-menu/mqsm-left-menu.scss";
+@import "./components/left-menu/mqsm-left-menu.scss";
+
+/**/
+@import "./components/current-playlist/mqsm-current-playlist.scss";
+
+/* manage playlists **/
+@import "./components/manage-playlists/mqsm-manage-playlists.scss";
+@import "./components/manage-playlists/components/add-rule-dialog/mqsm-playlist-add-rule-dialog.scss";
 
 /* system settings*/
-@import "components/system/mpsm-system-settings";
-@import "components/system/database-maintenance/mqsm-database-maintenance.scss";
+@import "./components/system/mpsm-system-settings";
+@import "./components/system/database-maintenance/mqsm-database-maintenance.scss";
 
 html,body{
   height:100%;
@@ -32,5 +45,6 @@ html,body{
     margin: 0;
     padding: 0;
     background-color: $pt-dark-app-background-color;
+    color: $pt-dark-code-text-color;
   }
 }

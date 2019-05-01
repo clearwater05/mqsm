@@ -2,10 +2,16 @@ const cote = require('cote')({environment: 'mqm'});
 const {
     UPDATE_DATABASE,
     INCREASE_SONG_PLAYCOUNT_COMMAND,
+    INCREASE_SONG_SKIP_COUNT_COMMAND,
+    CALCULATE_SONG_AUTO_RATING_COMMAND,
     CURRENT_PLAYLIST_COMMAND,
     REQUEST_SONG_INFO,
     CLEANUP_DATABASE_COMMAND,
-    UPDATE_SONG_RATING_COMMAND
+    UPDATE_SONG_RATING_COMMAND,
+    REQUEST_SAVED_PLAYLISTS,
+    REQUEST_SAVED_PLAYLIST_PREVIEW,
+    REQUEST_SONG_ATTRIBUTES_LIST,
+    REQUEST_LIST_STATISTICS
 } = require('../../front.constants');
 
 const dbRequester = new cote.Requester({
@@ -66,6 +72,66 @@ module.exports = {
     },
 
     /**
+     * @param {string} song
+     */
+    increaseSongScipCount(song) {
+        return new Promise((resolve) => {
+            const req = {
+                type: INCREASE_SONG_SKIP_COUNT_COMMAND,
+                value: song
+            };
+
+            dbRequester.send(req, (result) => {
+                resolve(result);
+            });
+        });
+    },
+
+    /**
+     *
+     * @param song
+     * @param rating
+     * @return {Promise<any>}
+     */
+    updateSongRating(song, rating) {
+        return new Promise((resolve) => {
+            const req = {
+                type: UPDATE_SONG_RATING_COMMAND,
+                value: {
+                    song,
+                    rating
+                }
+            };
+
+            dbRequester.send(req, (result) => {
+                resolve(result);
+            });
+        });
+    },
+
+    /**
+     *
+     * @param {string} song
+     * @param {boolean} isSkip
+     * @returns {Promise<any>}
+     */
+    updateAutoScore(song, isSkip = false) {
+        return new Promise((resolve => {
+            const req = {
+                type: CALCULATE_SONG_AUTO_RATING_COMMAND,
+                value: {
+                    song,
+                    isSkip
+                }
+            };
+
+            dbRequester.send(req, result => {
+                resolve(result);
+            });
+        }));
+    },
+
+    /**
      *
      * @param {string[]} playlist
      * @return {Promise<Object[]>}
@@ -107,22 +173,72 @@ module.exports = {
 
     /**
      *
-     * @param song
-     * @param rating
+     * @param playlistName
      * @return {Promise<any>}
      */
-    updateSongRating(song, rating) {
+    requestSavedPlaylist(playlistName) {
         return new Promise((resolve) => {
             const req = {
-                type: UPDATE_SONG_RATING_COMMAND,
-                value: {
-                    song,
-                    rating
-                }
+                type: REQUEST_SAVED_PLAYLISTS
+            };
+            if (playlistName) {
+                req.value = playlistName;
+            }
+
+            dbRequester.send(req, (res) => {
+                resolve(res);
+            });
+        });
+    },
+
+    /**
+     *
+     * @param playlistName
+     * @return {Promise<any>}
+     */
+    requestSavedPlaylistPreview(playlistName) {
+        return new Promise((resolve) => {
+            const req = {
+                type: REQUEST_SAVED_PLAYLIST_PREVIEW,
+                value: playlistName
             };
 
-            dbRequester.send(req, (result) => {
-                resolve(result);
+            dbRequester.send(req, (res) => {
+                resolve(res);
+            });
+        });
+    },
+
+    /**
+     *
+     * @returns {Promise<any>}
+     */
+    requestSongAttributesList() {
+        return new Promise((resolve) => {
+            const req = {
+                type: REQUEST_SONG_ATTRIBUTES_LIST
+            };
+
+            dbRequester.send(req, (res) => {
+                resolve(res);
+            });
+        });
+    },
+
+    /**
+     *
+     * @param {array} list
+     * @returns {Promise<Array>}
+     */
+    requestListStatistics(list) {
+        return new Promise(resolve => {
+            const req = {
+                type: REQUEST_LIST_STATISTICS,
+                value: list
+            };
+
+            dbRequester.send(req, res => {
+                resolve(res);
             });
         });
     }
