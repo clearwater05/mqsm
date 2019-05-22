@@ -56,7 +56,7 @@ module.exports = () => {
                 await dbEventPublisher.publishProgress('start', list.length);
 
                 for (let i = 0, j = list.length; i < j; i++) {
-                    await stickersModel.updateStatisticsStickers(list[i]);
+                    await stickersModel.updateAllSongStickers(list[i]);
                     await songModel.songUpsert(list[i]);
                     await dbEventPublisher.publishProgress('ongoing', j, i);
                     await promisedTimeout(5);
@@ -78,6 +78,7 @@ module.exports = () => {
     dbCommandResponder.on(INCREASE_SONG_PLAYCOUNT_COMMAND, async (req, cb) => {
         const song = req.value;
         const result = await songModel.updateSongStatistic(song);
+        await stickersModel.updateAllSongStickers(result.toJSON());
 
         cb(result);
     });
@@ -88,7 +89,7 @@ module.exports = () => {
     dbCommandResponder.on(INCREASE_SONG_SKIP_COUNT_COMMAND, async (req, cb) => {
         const song = req.value;
         const result = await songModel.increaseSkipCount(song);
-        cb(result);
+        cb(result.toJSON());
     });
 
     /**
@@ -110,8 +111,14 @@ module.exports = () => {
             isSkip
         } = req.value;
         const result = await songModel.updateAutoScore(song, isSkip);
+        const autoscore = result.toJSON();
 
-        cb(result);
+        await stickersModel.updateAllSongStickers({
+            filename: autoscore.filename,
+            autoscore: autoscore.autoscore
+        });
+
+        cb(result.toJSON());
     });
 
     /**
@@ -153,7 +160,7 @@ module.exports = () => {
         const rawDefinition = await playlistModel.getPlaylistDefinition(req.value);
         const query = mapPlaylistDefinitionToQuery(rawDefinition);
 
-        cb(true);
+        cb(query);
     });
 
     /**

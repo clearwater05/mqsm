@@ -127,17 +127,18 @@ Song.getSongStatistics = async (song) => {
  * @return {Promise<*>}
  */
 Song.updateSongStatistic = async (song) => {
-    const savedStatistics = await Song.getSongStatistics(song);
-
-    savedStatistics.lastplayed = new Date();
-    savedStatistics.fmps_playcount = +savedStatistics.get('fmps_playcount') + 1;
     try {
-        await savedStatistics.save(
+        const savedStatistics = await Song.getSongStatistics(song);
+
+        savedStatistics.lastplayed = new Date();
+        savedStatistics.fmps_playcount = +savedStatistics.get('fmps_playcount') + 1;
+
+        const result = await savedStatistics.save(
             {
                 fields: ['lastplayed', 'fmps_playcount']
             }
         );
-        return true;
+        return result;
     } catch (e) {
         const errMsg = `updateSongStatistic(${song}) failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
@@ -175,12 +176,11 @@ Song.increaseSkipCount = async (song) => {
         const songModel = await Song.getSongSkipCount(song);
         songModel.skipcount = +songModel.get('skipcount') + 1;
 
-        await songModel.save(
+        return await songModel.save(
             {
                 fields: ['skipcount']
             }
         );
-        return true;
     } catch (e) {
         const errMsg = `increaseSkipCount(${song}) failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
@@ -209,15 +209,18 @@ Song.updateAutoScore = async (song, isSkip = false) => {
             currentAutoScore = calculateCurrentAutoScore(+rating, +fmps_playcount);
         }
 
-        const autoScore = calculateAutoRating(currentAutoScore, +rating, +fmps_playcount, +skipcount, isSkip);
-        stat.autoscore = autoScore;
-        await stat.save(
+        stat.autoscore = calculateAutoRating(
+            currentAutoScore,
+            +rating,
+            +fmps_playcount,
+            +skipcount,
+            isSkip
+        );
+        return await stat.save(
             {
                 fields: ['autoscore']
             }
         );
-
-        return autoScore;
     } catch (e) {
         const errMsg = `updateAutoScore(${song}) failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
