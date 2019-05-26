@@ -100,9 +100,11 @@ function mapMetaTagsToStatisticsStickers(rawData) {
 /**
  *
  * @param stickers
- * @returns {Promise<Array>}
+ * @returns {Promise<*>}
  */
 async function updateStickers(stickers) {
+    const transaction = await sequelize.transaction();
+
     for (let i = 0, j = stickers.length; i < j; i++) {
         try {
             const [sticker, created] = await StickersModel.findOrCreate({
@@ -113,15 +115,21 @@ async function updateStickers(stickers) {
                 },
                 defaults: {
                     value: ''
-                }
+                },
+                transaction
             });
             sticker.value = stickers[i].value;
-            await sticker.save();
+            await sticker.save({
+                transaction
+            });
         } catch (e) {
             const errMsg = `stickerUpsert(${stickers[i]}) failed (${scriptName}): `;
             logger.errorLog(errMsg, e);
+            transaction.rollback();
+            return;
         }
     }
+    await transaction.commit();
 }
 
 /**

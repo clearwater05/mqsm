@@ -91,12 +91,19 @@ Song.getSongInfo = async (song) => {
  * @returns {Promise.<>}
  */
 Song.songUpsert = async (songInfo) => {
+    const transaction = await sequelize.transaction();
+
     try {
         const props = mapMetaTagsToProps(songInfo);
-        await Song.upsert(props);
+
+        await Song.upsert(props, {
+            transaction
+        });
+        await transaction.commit();
     } catch (e) {
         const errMsg = `songUpsert(${song}) failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
+        await transaction.rollback();
     }
 };
 
@@ -127,6 +134,7 @@ Song.getSongStatistics = async (song) => {
  * @return {Promise<*>}
  */
 Song.updateSongStatistic = async (song) => {
+    const transaction = await sequelize.transaction();
     try {
         const savedStatistics = await Song.getSongStatistics(song);
 
@@ -135,13 +143,18 @@ Song.updateSongStatistic = async (song) => {
 
         const result = await savedStatistics.save(
             {
-                fields: ['lastplayed', 'fmps_playcount']
+                fields: ['lastplayed', 'fmps_playcount'],
+                transaction
             }
         );
+
+        await transaction.commit();
         return result;
     } catch (e) {
         const errMsg = `updateSongStatistic(${song}) failed (${scriptName}): `;
+
         logger.errorLog(errMsg, e);
+        await transaction.rollback();
         return null;
     }
 };
@@ -172,18 +185,26 @@ Song.getSongSkipCount = async (song) => {
  * @returns {Promise<null|boolean>}
  */
 Song.increaseSkipCount = async (song) => {
+    const transaction = await sequelize.transaction();
+
     try {
         const songModel = await Song.getSongSkipCount(song);
         songModel.skipcount = +songModel.get('skipcount') + 1;
 
-        return await songModel.save(
+        const savedSong = await songModel.save(
             {
-                fields: ['skipcount']
+                fields: ['skipcount'],
+                transaction
             }
         );
+
+        await transaction.commit();
+        return savedSong;
     } catch (e) {
         const errMsg = `increaseSkipCount(${song}) failed (${scriptName}): `;
+
         logger.errorLog(errMsg, e);
+        await transaction.rollback();
         return null;
     }
 };
@@ -195,6 +216,8 @@ Song.increaseSkipCount = async (song) => {
  * @returns {Promise<null|number>}
  */
 Song.updateAutoScore = async (song, isSkip = false) => {
+    const transaction = await sequelize.transaction();
+
     try {
         const stat = await Song.getSongStatistics(song);
         const {
@@ -203,8 +226,8 @@ Song.updateAutoScore = async (song, isSkip = false) => {
             fmps_playcount,
             skipcount
         } = stat.toJSON();
-
         let currentAutoScore = +autoscore;
+
         if (!currentAutoScore) {
             currentAutoScore = calculateCurrentAutoScore(+rating, +fmps_playcount);
         }
@@ -216,14 +239,22 @@ Song.updateAutoScore = async (song, isSkip = false) => {
             +skipcount,
             isSkip
         );
-        return await stat.save(
+
+        const savedStat = await stat.save(
             {
-                fields: ['autoscore']
+                fields: ['autoscore'],
+                transaction
             }
         );
+
+        await transaction.commit();
+        return savedStat;
+
     } catch (e) {
         const errMsg = `updateAutoScore(${song}) failed (${scriptName}): `;
+
         logger.errorLog(errMsg, e);
+        await transaction.rollback();
         return null;
     }
 };
@@ -279,18 +310,26 @@ Song.cleanUpSongTable = async (fullSongList) => {
  * @return {Promise<*>}
  */
 Song.setRating = async (song, rating) => {
+    const transaction = await sequelize.transaction();
+
     try {
-        return await Song.update({
+        const updatedSong = await Song.update({
             rating: +rating,
             fmps_rating: +rating / 10
         }, {
             where: {
                 filename: song
-            }
+            },
+            transaction
         });
+
+        await transaction.commit();
+        return updatedSong;
     } catch (e) {
         const errMsg = `setRating(${song}, ${rating}) failed (${scriptName}): `;
+
         logger.errorLog(errMsg, e);
+        await transaction.rollback();
         return null;
     }
 };
