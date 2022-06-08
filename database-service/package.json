@@ -11,10 +11,10 @@
   "dependencies": {
     "co": "^4.6.0",
     "cote": "^0.16.2",
-    "sequelize": "^5.8.6",
-    "sqlite3": "^4.0.2"
+    "sequelize": "^5.22.3",
+    "sqlite3": "^5.0.2"
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.3"
+    "babel-eslint": "^8.2.6"
   }
 }

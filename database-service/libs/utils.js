@@ -229,6 +229,7 @@ function calculateCurrentAutoScore(rating, playcount) {
 }
 
 module.exports = {
+    songTags,
     operatorsAliases,
     mapMetaTagsToProps,
     calculateAutoRating,

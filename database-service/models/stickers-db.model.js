@@ -3,6 +3,7 @@ const Sequelize = require('sequelize');
 
 const sequelize = require('../services/stickers-db.service');
 const logger = require('../services/database-logger.service');
+const { songTags } = require('../libs/utils');
 const scriptName = path.basename(__filename);
 
 const StickersModel = sequelize.define(

@@ -66,7 +66,7 @@ Playlist.getPlaylistDefinition = async (name) => {
         const errMsg = `getPlaylistDefinition(${name}) failed (${scriptName}): `;
         logger.errorLog(errMsg, e);
     }
-}
+};
 
 
 Playlist.sync();

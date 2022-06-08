@@ -160,7 +160,7 @@ module.exports = {
             }
             return list;
         } catch (e) {
-            const errMsg = `getSongList(${command}) failed (153: ${scriptName}): `;
+            const errMsg = `getSongList(${command}) failed (155: ${scriptName}): `;
             logger.errorLog(errMsg, e);
             return [];
         }
